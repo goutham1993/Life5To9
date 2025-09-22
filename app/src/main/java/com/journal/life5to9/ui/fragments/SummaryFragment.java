@@ -20,6 +20,7 @@ import com.journal.life5to9.ui.adapters.CategorySummaryAdapter;
 import com.journal.life5to9.utils.CategoryEmojiMapper;
 import com.journal.life5to9.viewmodel.MainViewModel;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,6 +34,8 @@ public class SummaryFragment extends Fragment {
     private MainViewModel viewModel;
     private TextView textViewWeeklyTotal;
     private TextView textViewMonthlyTotal;
+    private TextView textViewWeeklyPeriod;
+    private TextView textViewMonthlyPeriod;
     private RecyclerView recyclerViewWeeklyCategoryBreakdown;
     private RecyclerView recyclerViewMonthlyCategoryBreakdown;
     private CategorySummaryAdapter weeklyAdapter;
@@ -47,10 +50,30 @@ public class SummaryFragment extends Fragment {
     private boolean isWeeklyExpanded = false;
     private boolean isMonthlyExpanded = false;
     
+    // Navigation functionality
+    private com.google.android.material.button.MaterialButton buttonWeeklyPrevious;
+    private com.google.android.material.button.MaterialButton buttonWeeklyNext;
+    private com.google.android.material.button.MaterialButton buttonMonthlyPrevious;
+    private com.google.android.material.button.MaterialButton buttonMonthlyNext;
+    
+    // Current navigation state
+    private Date currentWeekStart;
+    private Date currentMonthStart;
+    private Date originalWeekStart;
+    private Date originalMonthStart;
+    
+    // Date formatters
+    private SimpleDateFormat weekFormatter;
+    private SimpleDateFormat monthFormatter;
+    
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        
+        // Initialize date formatters
+        weekFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
+        monthFormatter = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
     }
     
     @Nullable
@@ -60,6 +83,8 @@ public class SummaryFragment extends Fragment {
         
         textViewWeeklyTotal = view.findViewById(R.id.textViewWeeklyTotal);
         textViewMonthlyTotal = view.findViewById(R.id.textViewMonthlyTotal);
+        textViewWeeklyPeriod = view.findViewById(R.id.textViewWeeklyPeriod);
+        textViewMonthlyPeriod = view.findViewById(R.id.textViewMonthlyPeriod);
         recyclerViewWeeklyCategoryBreakdown = view.findViewById(R.id.recyclerViewWeeklyCategoryBreakdown);
         recyclerViewMonthlyCategoryBreakdown = view.findViewById(R.id.recyclerViewMonthlyCategoryBreakdown);
         
@@ -69,8 +94,15 @@ public class SummaryFragment extends Fragment {
         layoutWeeklyBreakdown = view.findViewById(R.id.layoutWeeklyBreakdown);
         layoutMonthlyBreakdown = view.findViewById(R.id.layoutMonthlyBreakdown);
         
+        // Initialize navigation elements
+        buttonWeeklyPrevious = view.findViewById(R.id.buttonWeeklyPrevious);
+        buttonWeeklyNext = view.findViewById(R.id.buttonWeeklyNext);
+        buttonMonthlyPrevious = view.findViewById(R.id.buttonMonthlyPrevious);
+        buttonMonthlyNext = view.findViewById(R.id.buttonMonthlyNext);
+        
         setupRecyclerView();
         setupDropdownListeners();
+        setupNavigationListeners();
         observeData();
         
         return view;
@@ -91,6 +123,13 @@ public class SummaryFragment extends Fragment {
     private void setupDropdownListeners() {
         buttonWeeklyDropdown.setOnClickListener(v -> toggleWeeklyBreakdown());
         buttonMonthlyDropdown.setOnClickListener(v -> toggleMonthlyBreakdown());
+    }
+    
+    private void setupNavigationListeners() {
+        buttonWeeklyPrevious.setOnClickListener(v -> navigateToPreviousWeek());
+        buttonWeeklyNext.setOnClickListener(v -> navigateToNextWeek());
+        buttonMonthlyPrevious.setOnClickListener(v -> navigateToPreviousMonth());
+        buttonMonthlyNext.setOnClickListener(v -> navigateToNextMonth());
     }
     
     private void toggleWeeklyBreakdown() {
@@ -152,6 +191,12 @@ public class SummaryFragment extends Fragment {
         this.weekStart = weekStart;
         this.monthStart = monthStart;
         
+        // Initialize current navigation state
+        this.currentWeekStart = weekStart;
+        this.currentMonthStart = monthStart;
+        this.originalWeekStart = weekStart;
+        this.originalMonthStart = monthStart;
+        
         // Observe categories first, then activities
         viewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             this.categories = categories;
@@ -172,7 +217,7 @@ public class SummaryFragment extends Fragment {
     
     private void observeActivities() {
         // Observe weekly activities
-        viewModel.getActivitiesForWeek(weekStart).observe(getViewLifecycleOwner(), activities -> {
+        viewModel.getActivitiesForWeek(currentWeekStart).observe(getViewLifecycleOwner(), activities -> {
             double weeklyTotal = calculateTotalTime(activities);
             android.util.Log.d("SummaryFragment", "Weekly activities count: " + (activities != null ? activities.size() : 0));
             android.util.Log.d("SummaryFragment", "Weekly total: " + weeklyTotal + " hours");
@@ -181,13 +226,16 @@ public class SummaryFragment extends Fragment {
         });
         
         // Observe monthly activities
-        viewModel.getActivitiesForMonth(monthStart).observe(getViewLifecycleOwner(), activities -> {
+        viewModel.getActivitiesForMonth(currentMonthStart).observe(getViewLifecycleOwner(), activities -> {
             double monthlyTotal = calculateTotalTime(activities);
             android.util.Log.d("SummaryFragment", "Monthly activities count: " + (activities != null ? activities.size() : 0));
             android.util.Log.d("SummaryFragment", "Monthly total: " + monthlyTotal + " hours");
             textViewMonthlyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", monthlyTotal));
             updateMonthlyCategoryBreakdown(activities);
         });
+        
+        // Update period labels
+        updatePeriodLabels();
     }
     
     private double calculateTotalTime(List<Activity> activities) {
@@ -346,5 +394,105 @@ public class SummaryFragment extends Fragment {
         }
         
         monthlyAdapter.setSummaryItems(summaryItems);
+    }
+    
+    // Navigation methods
+    private void navigateToPreviousWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentWeekStart);
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        currentWeekStart = calendar.getTime();
+        
+        // Re-observe activities with new date
+        observeActivities();
+    }
+    
+    private void navigateToNextWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentWeekStart);
+        calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        currentWeekStart = calendar.getTime();
+        
+        // Re-observe activities with new date
+        observeActivities();
+    }
+    
+    private void navigateToPreviousMonth() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentMonthStart);
+        calendar.add(Calendar.MONTH, -1);
+        currentMonthStart = calendar.getTime();
+        
+        // Re-observe activities with new date
+        observeActivities();
+    }
+    
+    private void navigateToNextMonth() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentMonthStart);
+        calendar.add(Calendar.MONTH, 1);
+        currentMonthStart = calendar.getTime();
+        
+        // Re-observe activities with new date
+        observeActivities();
+    }
+    
+    private void updatePeriodLabels() {
+        // Update weekly period label
+        if (isCurrentWeek()) {
+            textViewWeeklyPeriod.setText("This Week");
+        } else {
+            String weekLabel = formatWeekRange(currentWeekStart);
+            textViewWeeklyPeriod.setText(weekLabel);
+        }
+        
+        // Update monthly period label
+        if (isCurrentMonth()) {
+            textViewMonthlyPeriod.setText("This Month");
+        } else {
+            String monthLabel = formatMonthRange(currentMonthStart);
+            textViewMonthlyPeriod.setText(monthLabel);
+        }
+    }
+    
+    private boolean isCurrentWeek() {
+        Calendar current = Calendar.getInstance();
+        Calendar week = Calendar.getInstance();
+        week.setTime(currentWeekStart);
+        
+        return current.get(Calendar.YEAR) == week.get(Calendar.YEAR) &&
+               current.get(Calendar.WEEK_OF_YEAR) == week.get(Calendar.WEEK_OF_YEAR);
+    }
+    
+    private boolean isCurrentMonth() {
+        Calendar current = Calendar.getInstance();
+        Calendar month = Calendar.getInstance();
+        month.setTime(currentMonthStart);
+        
+        return current.get(Calendar.YEAR) == month.get(Calendar.YEAR) &&
+               current.get(Calendar.MONTH) == month.get(Calendar.MONTH);
+    }
+    
+    private String formatWeekRange(Date weekStart) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(weekStart);
+        
+        // Get start of week (Monday)
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
+        calendar.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
+        Date start = calendar.getTime();
+        
+        // Get end of week (Sunday)
+        calendar.add(Calendar.DAY_OF_MONTH, 6);
+        Date end = calendar.getTime();
+        
+        return weekFormatter.format(start) + " - " + weekFormatter.format(end);
+    }
+    
+    private String formatMonthRange(Date monthStart) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(monthStart);
+        return monthFormatter.format(calendar.getTime());
     }
 }

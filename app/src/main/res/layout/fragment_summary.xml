@@ -42,13 +42,24 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonWeeklyPrevious"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="Previous week"
+                            app:icon="@android:drawable/ic_media_previous"
+                            app:iconSize="24dp" />
+
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:gravity="center">
 
                             <TextView
+                                android:id="@+id/textViewWeeklyPeriod"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="This Week"
@@ -74,13 +85,22 @@
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonWeeklyNext"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="Next week"
+                            app:icon="@android:drawable/ic_media_next"
+                            app:iconSize="24dp" />
+
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/buttonWeeklyDropdown"
                             style="@style/Widget.Material3.Button.IconButton"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:contentDescription="Toggle weekly breakdown"
                             app:icon="@android:drawable/ic_menu_more"
-                            app:iconSize="32dp" />
+                            app:iconSize="24dp" />
 
                     </LinearLayout>
 
@@ -133,13 +153,24 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonMonthlyPrevious"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="Previous month"
+                            app:icon="@android:drawable/ic_media_previous"
+                            app:iconSize="24dp" />
+
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:gravity="center">
 
                             <TextView
+                                android:id="@+id/textViewMonthlyPeriod"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="This Month"
@@ -165,13 +196,22 @@
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonMonthlyNext"
+                            style="@style/Widget.Material3.Button.IconButton"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:contentDescription="Next month"
+                            app:icon="@android:drawable/ic_media_next"
+                            app:iconSize="24dp" />
+
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/buttonMonthlyDropdown"
                             style="@style/Widget.Material3.Button.IconButton"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:contentDescription="Toggle monthly breakdown"
                             app:icon="@android:drawable/ic_menu_more"
-                            app:iconSize="32dp" />
+                            app:iconSize="24dp" />
 
                     </LinearLayout>
 
