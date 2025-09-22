@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    tools:context=".ui.fragments.ActivityFragment">
+
+    <!-- Selected Date Header -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSelectedDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
+
+            <!-- Previous Day Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonPreviousDay"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Previous Day"
+                app:icon="@android:drawable/ic_media_previous"
+                app:iconSize="24dp" />
+
+            <!-- Center: Day and Date -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginHorizontal="16dp">
+
+                <TextView
+                    android:id="@+id/textViewSelectedDay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monday"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+                    android:textColor="@color/primary"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/textViewSelectedDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dec 15, 2024"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/on_surface" />
+
+            </LinearLayout>
+
+            <!-- Next Day Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonNextDay"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Next Day"
+                app:icon="@android:drawable/ic_media_next"
+                app:iconSize="24dp" />
+
+            <!-- Calendar Icon -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSelectDate"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Select Date"
+                app:icon="@android:drawable/ic_menu_my_calendar"
+                app:iconSize="28dp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <!-- Activities List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewActivities"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardSelectedDate"
+        tools:listitem="@layout/item_activity" />
+
+    <TextView
+        android:id="@+id/textViewEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="No activities recorded for this date.\nTap the + button to add your first activity!"
+        android:textAlignment="center"
+        android:textColor="@color/on_surface_variant"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardSelectedDate" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

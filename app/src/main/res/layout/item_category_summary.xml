@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
+
+    <View
+        android:id="@+id/viewCategoryColor"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:background="@drawable/circle_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewCategoryName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:text="Category Name"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="@color/on_surface"
+        app:layout_constraintEnd_toStartOf="@+id/textViewTimeSpent"
+        app:layout_constraintStart_toEndOf="@+id/viewCategoryColor"
+        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+
+    <TextView
+        android:id="@+id/textViewTimeSpent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5.5h"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="@color/primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+
+    <ProgressBar
+        android:id="@+id/progressBarCategory"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="75"
+        android:progressTint="@color/primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,25 @@
+package com.journal.life5to9.service;
+
+import androidx.lifecycle.LiveData;
+
+import com.journal.life5to9.data.entity.Activity;
+import com.journal.life5to9.data.entity.Category;
+
+import java.util.Date;
+import java.util.List;
+
+public interface ActivityService {
+    LiveData<List<Activity>> getAllActivities();
+    LiveData<Activity> getActivityById(long id);
+    LiveData<List<Activity>> getActivitiesByCategory(long categoryId);
+    LiveData<List<Activity>> getActivitiesByDateRange(Date startDate, Date endDate);
+    LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay);
+    LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate);
+    LiveData<Double> getTotalTimeByDateRange(Date startDate, Date endDate);
+    LiveData<List<Activity>> getActivitiesForWeek(Date weekStart);
+    LiveData<List<Activity>> getActivitiesForMonth(Date monthStart);
+    void addActivity(long categoryId, String notes, double timeSpentHours, Date date);
+    void updateActivity(Activity activity);
+    void deleteActivity(Activity activity);
+    void deleteActivityById(long id);
+}
