@@ -50,6 +50,10 @@ public class MainViewModel extends ViewModel {
         return activityService.getTotalTimeByDateRange(startDate, endDate);
     }
     
+    public LiveData<List<String>> getAllDistinctNotes() {
+        return activityService.getAllDistinctNotes();
+    }
+    
     public void addActivity(long categoryId, String notes, double timeSpentHours, Date date) {
         activityService.addActivity(categoryId, notes, timeSpentHours, date);
     }

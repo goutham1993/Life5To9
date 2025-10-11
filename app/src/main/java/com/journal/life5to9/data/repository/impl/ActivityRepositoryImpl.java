@@ -57,6 +57,12 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     }
     
     @Override
+    public LiveData<List<String>> getAllDistinctNotes() {
+        android.util.Log.d("ActivityRepositoryImpl", "Getting all distinct notes from database");
+        return activityDao.getAllDistinctNotes();
+    }
+    
+    @Override
     public void insertActivity(Activity activity) {
         executor.execute(() -> activityDao.insertActivity(activity));
     }

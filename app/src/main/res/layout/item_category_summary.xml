@@ -4,7 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
 
     <View
         android:id="@+id/viewCategoryColor"
@@ -34,6 +37,16 @@
         android:text="5.5h"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:textColor="@color/primary"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"
+        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+
+    <ImageView
+        android:id="@+id/imageViewExpand"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:src="@android:drawable/arrow_down_float"
+        android:contentDescription="Expand category"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
 
@@ -49,5 +62,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
+
+    <LinearLayout
+        android:id="@+id/layoutActivitiesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBarCategory">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewActivities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_activity_detail" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -104,6 +104,11 @@ public class ActivityServiceImpl implements ActivityService {
     }
     
     @Override
+    public LiveData<List<String>> getAllDistinctNotes() {
+        return activityRepository.getAllDistinctNotes();
+    }
+    
+    @Override
     public void addActivity(long categoryId, String notes, double timeSpentHours, Date date) {
         Activity activity = new Activity(categoryId, notes, timeSpentHours, date);
         activityRepository.insertActivity(activity);

@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.Filter;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -39,9 +40,10 @@ public class AddActivityDialog extends DialogFragment {
     private OnActivityAddedListener listener;
     private List<Category> categories = new ArrayList<>();
     private ArrayAdapter<String> categoryAdapter;
+    private ArrayAdapter<String> notesAdapter;
     
     private AutoCompleteTextView autoCompleteCategory;
-    private TextInputEditText editTextNotes;
+    private AutoCompleteTextView autoCompleteNotes;
     private TextInputEditText editTextTimeSpent;
     private TextInputEditText editTextDate;
     private TextInputEditText editTextTime;
@@ -106,6 +108,8 @@ public class AddActivityDialog extends DialogFragment {
             if (categories != null && !categories.isEmpty()) {
                 setupCategoryDropdown();
             }
+            // Setup notes auto-completion when dialog is shown
+            setupNotesAutoCompletion();
         });
         
         return dialog;
@@ -113,7 +117,7 @@ public class AddActivityDialog extends DialogFragment {
     
     private void initializeViews(View view) {
         autoCompleteCategory = view.findViewById(R.id.autoCompleteCategory);
-        editTextNotes = view.findViewById(R.id.editTextNotes);
+        autoCompleteNotes = view.findViewById(R.id.autoCompleteNotes);
         editTextTimeSpent = view.findViewById(R.id.editTextTimeSpent);
         editTextDate = view.findViewById(R.id.editTextDate);
         editTextTime = view.findViewById(R.id.editTextTime);
@@ -210,6 +214,26 @@ public class AddActivityDialog extends DialogFragment {
         });
     }
     
+    private void setupNotesAutoCompletion() {
+        if (!isAdded() || getContext() == null) {
+            return;
+        }
+        
+        // Just set up the AutoCompleteTextView - adapter will be set later
+        autoCompleteNotes.setThreshold(1);
+    }
+    
+    public void setNotesSuggestions(List<String> notes) {
+        android.util.Log.d("AddActivityDialog", "setNotesSuggestions called with " + (notes != null ? notes.size() : 0) + " notes");
+        if (notes != null && isAdded() && getContext() != null) {
+            // Create adapter with the database notes
+            notesAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, notes);
+            autoCompleteNotes.setAdapter(notesAdapter);
+            android.util.Log.d("AddActivityDialog", "Notes adapter created with " + notes.size() + " items from database");
+        }
+    }
+    
     private void updateCategoryAdapter() {
         // Check if fragment is still attached before updating adapter
         if (!isAdded() || categoryAdapter == null) {
@@ -264,7 +288,7 @@ public class AddActivityDialog extends DialogFragment {
     }
     
     private void saveActivity() {
-        String notes = editTextNotes.getText().toString().trim();
+        String notes = autoCompleteNotes.getText().toString().trim();
         double timeSpent = Double.parseDouble(editTextTimeSpent.getText().toString().trim());
         
         // Create the final date with the selected time

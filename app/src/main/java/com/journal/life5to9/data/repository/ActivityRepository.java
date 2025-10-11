@@ -15,6 +15,7 @@ public interface ActivityRepository {
     LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay);
     LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate);
     LiveData<Double> getTotalTimeByDateRange(Date startDate, Date endDate);
+    LiveData<List<String>> getAllDistinctNotes();
     void insertActivity(Activity activity);
     void updateActivity(Activity activity);
     void deleteActivity(Activity activity);

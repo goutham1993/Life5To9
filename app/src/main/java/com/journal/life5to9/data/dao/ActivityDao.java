@@ -48,4 +48,7 @@ public interface ActivityDao {
     
     @Query("DELETE FROM activities WHERE id = :id")
     void deleteActivityById(long id);
+    
+    @Query("SELECT DISTINCT notes FROM activities WHERE notes IS NOT NULL AND notes != '' ORDER BY notes ASC")
+    LiveData<List<String>> getAllDistinctNotes();
 }

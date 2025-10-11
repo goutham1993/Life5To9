@@ -149,13 +149,24 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getAllCategories().observe(this, categories -> {
             if (categories != null && !categories.isEmpty()) {
                 dialog.setCategories(categories);
-                dialog.setSelectedDate(selectedDate);
-                dialog.show(getSupportFragmentManager(), "AddActivityDialog");
-            } else {
-                // Show dialog even if no categories (for debugging)
-                dialog.setSelectedDate(selectedDate);
-                dialog.show(getSupportFragmentManager(), "AddActivityDialog");
             }
+            dialog.setSelectedDate(selectedDate);
+            
+            // Show dialog first
+            dialog.show(getSupportFragmentManager(), "AddActivityDialog");
+            
+            // Load notes suggestions after dialog is shown
+            viewModel.getAllDistinctNotes().observe(this, notes -> {
+                android.util.Log.d("MainActivity", "Notes loaded from database: " + (notes != null ? notes.size() : 0));
+                if (notes != null && !notes.isEmpty()) {
+                    for (String note : notes) {
+                        android.util.Log.d("MainActivity", "Database note: " + note);
+                    }
+                    dialog.setNotesSuggestions(notes);
+                } else {
+                    android.util.Log.d("MainActivity", "No notes found in database - this is normal for new installations");
+                }
+            });
         });
     }
     
