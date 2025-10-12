@@ -57,6 +57,15 @@ public class SummaryFragment extends Fragment {
     private boolean isWeekendExpanded = false;
     private boolean isMonthlyExpanded = false;
     
+    // Monthly tab mode constants
+    private static final int MONTHLY_TAB_WEEKDAY = 0;
+    private static final int MONTHLY_TAB_WEEKEND = 1;
+    private static final int MONTHLY_TAB_ALL = 2;
+    private int currentMonthlyTabMode = MONTHLY_TAB_WEEKDAY;
+    
+    // Store current monthly activities for tab filtering
+    private List<Activity> currentMonthlyActivities = new ArrayList<>();
+    
     // Navigation functionality
     private com.google.android.material.button.MaterialButton buttonWeeklyPrevious;
     private com.google.android.material.button.MaterialButton buttonWeeklyNext;
@@ -64,6 +73,9 @@ public class SummaryFragment extends Fragment {
     private com.google.android.material.button.MaterialButton buttonWeekendNext;
     private com.google.android.material.button.MaterialButton buttonMonthlyPrevious;
     private com.google.android.material.button.MaterialButton buttonMonthlyNext;
+    private com.google.android.material.button.MaterialButton buttonMonthlyWeekday;
+    private com.google.android.material.button.MaterialButton buttonMonthlyWeekend;
+    private com.google.android.material.button.MaterialButton buttonMonthlyAll;
     
     // Current navigation state
     private Date currentWeekdayStart;
@@ -121,6 +133,9 @@ public class SummaryFragment extends Fragment {
         buttonWeekendNext = view.findViewById(R.id.buttonWeekendNext);
         buttonMonthlyPrevious = view.findViewById(R.id.buttonMonthlyPrevious);
         buttonMonthlyNext = view.findViewById(R.id.buttonMonthlyNext);
+        buttonMonthlyWeekday = view.findViewById(R.id.buttonMonthlyWeekday);
+        buttonMonthlyWeekend = view.findViewById(R.id.buttonMonthlyWeekend);
+        buttonMonthlyAll = view.findViewById(R.id.buttonMonthlyAll);
         
         setupRecyclerView();
         setupCardBackgrounds(view);
@@ -180,6 +195,11 @@ public class SummaryFragment extends Fragment {
         buttonWeeklyDropdown.setOnClickListener(v -> toggleWeeklyBreakdown());
         buttonWeekendDropdown.setOnClickListener(v -> toggleWeekendBreakdown());
         buttonMonthlyDropdown.setOnClickListener(v -> toggleMonthlyBreakdown());
+        
+        // Monthly tab listeners
+        buttonMonthlyWeekday.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_WEEKDAY));
+        buttonMonthlyWeekend.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_WEEKEND));
+        buttonMonthlyAll.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_ALL));
     }
     
     private void setupNavigationListeners() {
@@ -223,10 +243,54 @@ public class SummaryFragment extends Fragment {
             layoutMonthlyBreakdown.setVisibility(android.view.View.VISIBLE);
             buttonMonthlyDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_close_clear_cancel));
             buttonMonthlyDropdown.setIconSize(32);
+            updateMonthlyTabSelector();
         } else {
             layoutMonthlyBreakdown.setVisibility(android.view.View.GONE);
             buttonMonthlyDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_more));
             buttonMonthlyDropdown.setIconSize(32);
+        }
+    }
+    
+    private void setMonthlyTabMode(int tabMode) {
+        currentMonthlyTabMode = tabMode;
+        updateMonthlyTabSelector();
+        // Refresh monthly breakdown with current activities and new tab mode
+        if (currentMonthlyActivities != null && !currentMonthlyActivities.isEmpty()) {
+            updateMonthlyCategoryBreakdown(currentMonthlyActivities);
+        }
+    }
+    
+    private void updateMonthlyTabSelector() {
+        // Reset all buttons to unselected state
+        buttonMonthlyWeekday.setSelected(false);
+        buttonMonthlyWeekend.setSelected(false);
+        buttonMonthlyAll.setSelected(false);
+        
+        // Reset button colors to default
+        buttonMonthlyWeekday.setBackgroundTintList(null);
+        buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        buttonMonthlyWeekend.setBackgroundTintList(null);
+        buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        buttonMonthlyAll.setBackgroundTintList(null);
+        buttonMonthlyAll.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        
+        // Set selected button with orange highlighting
+        switch (currentMonthlyTabMode) {
+            case MONTHLY_TAB_WEEKDAY:
+                buttonMonthlyWeekday.setSelected(true);
+                buttonMonthlyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                break;
+            case MONTHLY_TAB_WEEKEND:
+                buttonMonthlyWeekend.setSelected(true);
+                buttonMonthlyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                break;
+            case MONTHLY_TAB_ALL:
+                buttonMonthlyAll.setSelected(true);
+                buttonMonthlyAll.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonMonthlyAll.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                break;
         }
     }
     
@@ -341,6 +405,9 @@ public class SummaryFragment extends Fragment {
         
         // Observe monthly activities
         viewModel.getActivitiesForMonth(currentMonthStart).observe(getViewLifecycleOwner(), activities -> {
+            // Store current activities for tab filtering
+            currentMonthlyActivities = activities != null ? activities : new ArrayList<>();
+            
             double monthlyTotal = calculateTotalTime(activities);
             android.util.Log.d("SummaryFragment", "Monthly activities count: " + (activities != null ? activities.size() : 0));
             android.util.Log.d("SummaryFragment", "Monthly total: " + monthlyTotal + " hours");
@@ -601,6 +668,9 @@ public class SummaryFragment extends Fragment {
             layoutMonthlyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
+        // Filter activities based on selected tab
+        List<Activity> filteredActivities = filterActivitiesByTab(activities);
+        
         // Calculate previous month dates for comparison
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(currentMonthStart);
@@ -609,8 +679,40 @@ public class SummaryFragment extends Fragment {
         
         // Load previous month data for comparison
         viewModel.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart).observe(getViewLifecycleOwner(), previousActivities -> {
-            updateMonthlyCategoryBreakdownWithComparison(activities, previousActivities);
+            List<Activity> filteredPreviousActivities = filterActivitiesByTab(previousActivities);
+            updateMonthlyCategoryBreakdownWithComparison(filteredActivities, filteredPreviousActivities);
         });
+    }
+    
+    private List<Activity> filterActivitiesByTab(List<Activity> activities) {
+        if (activities == null) return new ArrayList<>();
+        
+        // If "All" tab is selected, return all activities without filtering
+        if (currentMonthlyTabMode == MONTHLY_TAB_ALL) {
+            return new ArrayList<>(activities);
+        }
+        
+        List<Activity> filteredActivities = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        
+        for (Activity activity : activities) {
+            calendar.setTime(activity.getDate());
+            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+            
+            if (currentMonthlyTabMode == MONTHLY_TAB_WEEKDAY) {
+                // Monday (2) to Friday (6)
+                if (dayOfWeek >= Calendar.MONDAY && dayOfWeek <= Calendar.FRIDAY) {
+                    filteredActivities.add(activity);
+                }
+            } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKEND) {
+                // Saturday (7) and Sunday (1)
+                if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+                    filteredActivities.add(activity);
+                }
+            }
+        }
+        
+        return filteredActivities;
     }
     
     private void updateMonthlyCategoryBreakdownWithComparison(List<Activity> activities, List<Activity> previousActivities) {
