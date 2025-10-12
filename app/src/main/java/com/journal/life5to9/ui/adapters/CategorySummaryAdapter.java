@@ -185,7 +185,13 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                     secondaryTextColor = itemView.getContext().getColor(android.R.color.secondary_text_light);
                 }
                 
-                activityItem.setBackgroundColor(backgroundColor);
+                // Create rounded background drawable
+                android.graphics.drawable.GradientDrawable roundedBackground = new android.graphics.drawable.GradientDrawable();
+                roundedBackground.setColor(backgroundColor);
+                roundedBackground.setCornerRadius(20f); // 20dp corner radius for pill shape
+                roundedBackground.setStroke(1, itemView.getContext().getColor(android.R.color.darker_gray));
+                
+                activityItem.setBackground(roundedBackground);
                 
                 // Add margin between items
                 LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(

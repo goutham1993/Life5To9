@@ -121,11 +121,40 @@ public class SummaryFragment extends Fragment {
         buttonMonthlyNext = view.findViewById(R.id.buttonMonthlyNext);
         
         setupRecyclerView();
+        setupCardBackgrounds(view);
         setupDropdownListeners();
         setupNavigationListeners();
         observeData();
         
         return view;
+    }
+    
+    private void setupCardBackgrounds(View view) {
+        // Check if dark theme is enabled
+        int nightModeFlags = getContext().getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        
+        int backgroundColor;
+        if (isDarkTheme) {
+            backgroundColor = getContext().getColor(android.R.color.background_dark);
+        } else {
+            backgroundColor = getContext().getColor(android.R.color.background_light);
+        }
+        
+        // Find all MaterialCardView elements and set their background color
+        com.google.android.material.card.MaterialCardView weeklyCard = view.findViewById(R.id.cardWeekly);
+        com.google.android.material.card.MaterialCardView weekendCard = view.findViewById(R.id.cardWeekend);
+        com.google.android.material.card.MaterialCardView monthlyCard = view.findViewById(R.id.cardMonthly);
+        
+        if (weeklyCard != null) {
+            weeklyCard.setCardBackgroundColor(backgroundColor);
+        }
+        if (weekendCard != null) {
+            weekendCard.setCardBackgroundColor(backgroundColor);
+        }
+        if (monthlyCard != null) {
+            monthlyCard.setCardBackgroundColor(backgroundColor);
+        }
     }
     
     private void setupRecyclerView() {
