@@ -165,7 +165,26 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 activityItem.setPadding(16, 12, 16, 12);
                 
                 // Use theme-aware background color
-                int backgroundColor = itemView.getContext().getColor(android.R.color.background_light);
+                int backgroundColor;
+                int textColor;
+                int secondaryTextColor;
+                
+                // Check if dark theme is enabled
+                int nightModeFlags = itemView.getContext().getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+                boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                
+                if (isDarkTheme) {
+                    // Dark theme colors
+                    backgroundColor = itemView.getContext().getColor(android.R.color.background_dark);
+                    textColor = itemView.getContext().getColor(android.R.color.primary_text_dark);
+                    secondaryTextColor = itemView.getContext().getColor(android.R.color.secondary_text_dark);
+                } else {
+                    // Light theme colors
+                    backgroundColor = itemView.getContext().getColor(android.R.color.background_light);
+                    textColor = itemView.getContext().getColor(android.R.color.primary_text_light);
+                    secondaryTextColor = itemView.getContext().getColor(android.R.color.secondary_text_light);
+                }
+                
                 activityItem.setBackgroundColor(backgroundColor);
                 
                 // Add margin between items
@@ -180,7 +199,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 TextView notesText = new TextView(itemView.getContext());
                 notesText.setText(activity.getNotes());
                 notesText.setTextAppearance(android.R.style.TextAppearance_Medium);
-                notesText.setTextColor(itemView.getContext().getColor(android.R.color.primary_text_light));
+                notesText.setTextColor(textColor);
                 notesText.setMaxLines(2);
                 notesText.setEllipsize(android.text.TextUtils.TruncateAt.END);
                 activityItem.addView(notesText);
@@ -208,7 +227,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 TextView dateText = new TextView(itemView.getContext());
                 dateText.setText(dateFormat.format(activity.getDate()));
                 dateText.setTextAppearance(android.R.style.TextAppearance_Small);
-                dateText.setTextColor(itemView.getContext().getColor(android.R.color.secondary_text_light));
+                dateText.setTextColor(secondaryTextColor);
                 dateText.setGravity(android.view.Gravity.END);
                 timeDateRow.addView(dateText);
                 
