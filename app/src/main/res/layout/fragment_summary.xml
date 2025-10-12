@@ -116,7 +116,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Category Breakdown"
                             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                             android:textColor="@color/on_surface"
                             android:layout_marginBottom="8dp" />
@@ -227,9 +226,7 @@
 
                         <TextView
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Category Breakdown"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                             android:textColor="@color/on_surface"
                             android:layout_marginBottom="8dp" />
 
@@ -339,9 +336,7 @@
 
                         <TextView
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Category Breakdown"
-                            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
                             android:textColor="@color/on_surface"
                             android:layout_marginBottom="8dp" />
 
