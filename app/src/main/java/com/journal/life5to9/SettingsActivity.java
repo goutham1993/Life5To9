@@ -1,6 +1,7 @@
 package com.journal.life5to9;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Switch;
@@ -26,6 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Switch switchNotifications;
     private MaterialButton buttonTimePicker;
     private TextView textViewTime;
+    private MaterialButton buttonExport, buttonImport;
     
     private SharedPreferences preferences;
     private int selectedHour = 21; // Default 9 PM
@@ -55,6 +57,8 @@ public class SettingsActivity extends AppCompatActivity {
         switchNotifications = findViewById(R.id.switchNotifications);
         buttonTimePicker = findViewById(R.id.buttonTimePicker);
         textViewTime = findViewById(R.id.textViewTime);
+        buttonExport = findViewById(R.id.buttonExport);
+        buttonImport = findViewById(R.id.buttonImport);
     }
     
     private void loadSettings() {
@@ -88,6 +92,16 @@ public class SettingsActivity extends AppCompatActivity {
         });
         
         buttonTimePicker.setOnClickListener(v -> showTimePicker());
+        
+        buttonExport.setOnClickListener(v -> {
+            Intent exportIntent = new Intent(this, ExportImportActivity.class);
+            startActivity(exportIntent);
+        });
+        
+        buttonImport.setOnClickListener(v -> {
+            Intent importIntent = new Intent(this, ExportImportActivity.class);
+            startActivity(importIntent);
+        });
     }
     
     private void showTimePicker() {

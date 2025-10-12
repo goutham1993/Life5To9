@@ -19,6 +19,9 @@ public interface ActivityDao {
     @Query("SELECT * FROM activities ORDER BY date DESC, createdAt DESC")
     LiveData<List<Activity>> getAllActivities();
     
+    @Query("SELECT * FROM activities ORDER BY date DESC, createdAt DESC")
+    List<Activity> getAllActivitiesSync();
+    
     @Query("SELECT * FROM activities WHERE id = :id")
     LiveData<Activity> getActivityById(long id);
     
