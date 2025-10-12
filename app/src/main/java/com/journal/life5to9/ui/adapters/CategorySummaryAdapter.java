@@ -233,7 +233,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 TextView timeText = new TextView(itemView.getContext());
                 timeText.setText(String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()));
                 timeText.setTextAppearance(android.R.style.TextAppearance_Small);
-                timeText.setTextColor(itemView.getContext().getColor(android.R.color.holo_blue_dark));
+                timeText.setTextColor(itemView.getContext().getColor(android.R.color.holo_green_dark));
                 timeText.setGravity(android.view.Gravity.END);
                 timeDateRow.addView(timeText);
                 
