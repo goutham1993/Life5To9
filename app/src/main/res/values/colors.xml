@@ -34,4 +34,7 @@
     <color name="warning">#FFFF9800</color>
     <color name="error">#FFF44336</color>
     <color name="info">#FF2196F3</color>
+    
+    <!-- Calendar Colors -->
+    <color name="selected_date_orange">#FFFF9800</color>
 </resources>

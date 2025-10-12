@@ -8,10 +8,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.journal.life5to9.ui.fragments.ActivityFragment;
 import com.journal.life5to9.ui.fragments.CategoriesFragment;
 import com.journal.life5to9.ui.fragments.SummaryFragment;
+import com.journal.life5to9.ui.fragments.CalendarFragment;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
     
-    private static final int TAB_COUNT = 3;
+    private static final int TAB_COUNT = 4;
     private ActivityFragment activityFragment;
     
     public ViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -33,6 +34,8 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
                 return new CategoriesFragment();
             case 2:
                 return new SummaryFragment();
+            case 3:
+                return new CalendarFragment();
             default:
                 activityFragment = new ActivityFragment();
                 return activityFragment;

@@ -46,6 +46,10 @@ public class MainViewModel extends ViewModel {
         return activityService.getActivitiesByDate(startOfDay, endOfDay);
     }
     
+    public LiveData<List<Activity>> getActivitiesForDateRange(Date startDate, Date endDate) {
+        return activityService.getActivitiesByDate(startDate, endDate);
+    }
+    
     public LiveData<List<Activity>> getActivitiesForWeekdays(Date weekdayStart, Date weekdayEnd) {
         return activityService.getActivitiesForWeekdays(weekdayStart, weekdayEnd);
     }

@@ -124,6 +124,19 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.Activi
             // Display category name with emoji
             textViewCategoryName.setText(emoji + " " + categoryName);
             
+            // Set category color
+            if (category != null && category.getColor() != null) {
+                try {
+                    int color = android.graphics.Color.parseColor(category.getColor());
+                    textViewCategoryName.setTextColor(color);
+                } catch (IllegalArgumentException e) {
+                    // Use default color if parsing fails
+                    textViewCategoryName.setTextColor(itemView.getContext().getColor(android.R.color.white));
+                }
+            } else {
+                textViewCategoryName.setTextColor(itemView.getContext().getColor(android.R.color.white));
+            }
+            
             textViewTimeSpent.setText(String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()));
             textViewNotes.setText(activity.getNotes() != null ? activity.getNotes() : "No notes");
             
