@@ -73,6 +73,20 @@ public class MainActivity extends AppCompatActivity {
     private void setupViewPager() {
         viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
+        
+        // Add page change callback to handle FAB visibility
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                // Hide FAB on Summary tab (position 2), show on others
+                if (position == 2) { // Summary tab
+                    fab.hide();
+                } else {
+                    fab.show();
+                }
+            }
+        });
 
         // Connect TabLayout with ViewPager2
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
