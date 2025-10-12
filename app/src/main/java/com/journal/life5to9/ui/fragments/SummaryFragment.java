@@ -563,6 +563,33 @@ public class SummaryFragment extends Fragment {
         }
         
         monthlyAdapter.setSummaryItems(summaryItems);
+        
+        // Set dynamic height for monthly RecyclerView based on number of categories
+        setMonthlyRecyclerViewHeight(summaryItems.size());
+    }
+    
+    private void setMonthlyRecyclerViewHeight(int categoryCount) {
+        if (recyclerViewMonthlyCategoryBreakdown != null) {
+            // Calculate height based on number of categories
+            // Each category item is approximately 60dp in height
+            int itemHeight = 60; // dp
+            int minHeight = 200; // minimum height
+            int maxHeight = 800; // maximum height to prevent excessive height
+            
+            int calculatedHeight = Math.max(minHeight, categoryCount * itemHeight);
+            int finalHeight = Math.min(maxHeight, calculatedHeight);
+            
+            // Convert dp to pixels
+            float density = getResources().getDisplayMetrics().density;
+            int heightInPixels = (int) (finalHeight * density);
+            
+            // Set the height
+            ViewGroup.LayoutParams params = recyclerViewMonthlyCategoryBreakdown.getLayoutParams();
+            params.height = heightInPixels;
+            recyclerViewMonthlyCategoryBreakdown.setLayoutParams(params);
+            
+            android.util.Log.d("SummaryFragment", "Set monthly RecyclerView height to " + finalHeight + "dp for " + categoryCount + " categories");
+        }
     }
     
     // Navigation methods
