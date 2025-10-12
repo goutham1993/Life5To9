@@ -66,6 +66,10 @@ public class MainViewModel extends ViewModel {
         activityService.deleteActivity(activity);
     }
     
+    public LiveData<List<String>> getDistinctNotesByCategory(long categoryId) {
+        return activityService.getDistinctNotesByCategory(categoryId);
+    }
+    
     // Category related methods
     public LiveData<List<Category>> getAllCategories() {
         return categoryService.getAllCategories();

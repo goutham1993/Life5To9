@@ -173,6 +173,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     
+    public void loadNotesForCategory(long categoryId, AddActivityDialog dialog) {
+        viewModel.getDistinctNotesByCategory(categoryId).observe(this, notes -> {
+            if (notes != null && dialog != null) {
+                dialog.setNotesSuggestions(notes);
+            }
+        });
+    }
+    
     private void showAddCategoryDialog() {
         AddCategoryDialog dialog = AddCategoryDialog.newInstance();
         

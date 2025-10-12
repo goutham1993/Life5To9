@@ -19,6 +19,7 @@ public interface ActivityService {
     LiveData<List<Activity>> getActivitiesForWeek(Date weekStart);
     LiveData<List<Activity>> getActivitiesForWeekend(Date weekendStart);
     LiveData<List<Activity>> getActivitiesForMonth(Date monthStart);
+    LiveData<List<String>> getDistinctNotesByCategory(long categoryId);
     void addActivity(long categoryId, String notes, double timeSpentHours, Date date);
     void updateActivity(Activity activity);
     void deleteActivity(Activity activity);

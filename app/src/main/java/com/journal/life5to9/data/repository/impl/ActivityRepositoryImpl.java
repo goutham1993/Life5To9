@@ -78,4 +78,9 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     public void deleteActivityById(long id) {
         executor.execute(() -> activityDao.deleteActivityById(id));
     }
+    
+    @Override
+    public LiveData<List<String>> getDistinctNotesByCategory(long categoryId) {
+        return activityDao.getDistinctNotesByCategory(categoryId);
+    }
 }

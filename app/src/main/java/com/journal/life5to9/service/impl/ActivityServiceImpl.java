@@ -149,4 +149,9 @@ public class ActivityServiceImpl implements ActivityService {
     public void deleteActivityById(long id) {
         activityRepository.deleteActivityById(id);
     }
+    
+    @Override
+    public LiveData<List<String>> getDistinctNotesByCategory(long categoryId) {
+        return activityRepository.getDistinctNotesByCategory(categoryId);
+    }
 }

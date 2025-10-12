@@ -19,4 +19,5 @@ public interface ActivityRepository {
     void updateActivity(Activity activity);
     void deleteActivity(Activity activity);
     void deleteActivityById(long id);
+    LiveData<List<String>> getDistinctNotesByCategory(long categoryId);
 }

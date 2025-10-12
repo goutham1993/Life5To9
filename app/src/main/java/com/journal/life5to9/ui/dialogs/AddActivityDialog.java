@@ -39,9 +39,10 @@ public class AddActivityDialog extends DialogFragment {
     private OnActivityAddedListener listener;
     private List<Category> categories = new ArrayList<>();
     private ArrayAdapter<String> categoryAdapter;
+    private ArrayAdapter<String> notesAdapter;
     
     private AutoCompleteTextView autoCompleteCategory;
-    private TextInputEditText editTextNotes;
+    private AutoCompleteTextView autoCompleteNotes;
     private TextInputEditText editTextTimeSpent;
     private TextInputEditText editTextDate;
     private TextInputEditText editTextTime;
@@ -92,6 +93,7 @@ public class AddActivityDialog extends DialogFragment {
         initializeViews(view);
         setupDateAndTime();
         setupClickListeners();
+        setupAutoCompleteAdapters();
         
         // Setup category dropdown if categories are available
         if (categories != null && !categories.isEmpty()) {
@@ -113,7 +115,7 @@ public class AddActivityDialog extends DialogFragment {
     
     private void initializeViews(View view) {
         autoCompleteCategory = view.findViewById(R.id.autoCompleteCategory);
-        editTextNotes = view.findViewById(R.id.editTextNotes);
+        autoCompleteNotes = view.findViewById(R.id.autoCompleteNotes);
         editTextTimeSpent = view.findViewById(R.id.editTextTimeSpent);
         editTextDate = view.findViewById(R.id.editTextDate);
         editTextTime = view.findViewById(R.id.editTextTime);
@@ -204,6 +206,8 @@ public class AddActivityDialog extends DialogFragment {
             for (Category category : categories) {
                 if (category.getName().equals(selectedCategoryName)) {
                     selectedCategoryId = (int) category.getId();
+                    // Load notes for the selected category
+                    loadNotesForCategory(selectedCategoryId);
                     break;
                 }
             }
@@ -225,6 +229,29 @@ public class AddActivityDialog extends DialogFragment {
         categoryAdapter.clear();
         categoryAdapter.addAll(categoryNames);
         categoryAdapter.notifyDataSetChanged();
+    }
+    
+    private void setupAutoCompleteAdapters() {
+        // Adapter for Notes
+        notesAdapter = new ArrayAdapter<>(getContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        autoCompleteNotes.setAdapter(notesAdapter);
+        autoCompleteNotes.setThreshold(1); // Show suggestions after 1 character
+    }
+    
+    public void setNotesSuggestions(List<String> notes) {
+        if (notesAdapter != null && notes != null) {
+            notesAdapter.clear();
+            notesAdapter.addAll(notes);
+            notesAdapter.notifyDataSetChanged();
+        }
+    }
+    
+    public void loadNotesForCategory(long categoryId) {
+        if (getActivity() != null && getActivity() instanceof com.journal.life5to9.MainActivity) {
+            com.journal.life5to9.MainActivity mainActivity = (com.journal.life5to9.MainActivity) getActivity();
+            mainActivity.loadNotesForCategory(categoryId, this);
+        }
     }
     
     private void setupClickListeners() {
@@ -264,7 +291,7 @@ public class AddActivityDialog extends DialogFragment {
     }
     
     private void saveActivity() {
-        String notes = editTextNotes.getText().toString().trim();
+        String notes = autoCompleteNotes.getText().toString().trim();
         double timeSpent = Double.parseDouble(editTextTimeSpent.getText().toString().trim());
         
         // Create the final date with the selected time

@@ -41,12 +41,17 @@
         android:hint="Notes (Optional)"
         app:startIconDrawable="@android:drawable/ic_menu_edit">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editTextNotes"
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
-            android:maxLines="3" />
+            android:maxLines="3"
+            android:completionThreshold="1"
+            android:dropDownHeight="200dp"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="@android:color/transparent" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
