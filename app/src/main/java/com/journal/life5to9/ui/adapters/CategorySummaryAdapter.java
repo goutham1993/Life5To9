@@ -177,7 +177,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             // Display category name without trend icon for cleaner look
             textViewCategoryName.setText(item.getCategoryName());
             
-            // Display time with comparison
+            // Display time with comparison and percentage
             String timeDisplay = String.format(Locale.getDefault(), "%.1fh", item.getTimeSpent());
             if (item.getPreviousTimeSpent() > 0) {
                 double difference = item.getTimeSpent() - item.getPreviousTimeSpent();
@@ -185,6 +185,8 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                                  String.format(Locale.getDefault(), "%.1fh", difference);
                 timeDisplay += " (" + trendText + ")";
             }
+            // Add percentage to the display
+            timeDisplay += " - " + item.getPercentage() + "%";
             textViewTimeSpent.setText(timeDisplay);
             
             // Set trend color for time text
