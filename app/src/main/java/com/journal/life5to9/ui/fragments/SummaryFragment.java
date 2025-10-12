@@ -325,11 +325,20 @@ public class SummaryFragment extends Fragment {
         }
         
         // Group activities by category
+        Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
         for (Activity activity : activities) {
             long categoryId = activity.getCategoryId();
             double timeSpent = activity.getTimeSpentHours();
             android.util.Log.d("SummaryFragment", "Weekly Activity: ID=" + activity.getId() + ", CategoryID=" + categoryId + ", Time=" + timeSpent + "h, Notes=" + activity.getNotes());
+            
+            // Add to activities list for this category
+            if (!categoryActivitiesMap.containsKey(categoryId)) {
+                categoryActivitiesMap.put(categoryId, new ArrayList<>());
+            }
+            categoryActivitiesMap.get(categoryId).add(activity);
+            
+            // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
         }
         
@@ -340,6 +349,7 @@ public class SummaryFragment extends Fragment {
         for (Map.Entry<Long, Double> entry : categoryTimeMap.entrySet()) {
             long categoryId = entry.getKey();
             double timeSpent = entry.getValue();
+            List<Activity> categoryActivities = categoryActivitiesMap.get(categoryId);
             
             android.util.Log.d("SummaryFragment", "Looking up category ID: " + categoryId + " with time: " + timeSpent);
             
@@ -370,7 +380,7 @@ public class SummaryFragment extends Fragment {
             }
             
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
             ));
         }
         
@@ -399,11 +409,20 @@ public class SummaryFragment extends Fragment {
         }
         
         // Group activities by category
+        Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
         for (Activity activity : activities) {
             long categoryId = activity.getCategoryId();
             double timeSpent = activity.getTimeSpentHours();
             android.util.Log.d("SummaryFragment", "Weekend Activity: ID=" + activity.getId() + ", CategoryID=" + categoryId + ", Time=" + timeSpent + "h, Notes=" + activity.getNotes());
+            
+            // Add to activities list for this category
+            if (!categoryActivitiesMap.containsKey(categoryId)) {
+                categoryActivitiesMap.put(categoryId, new ArrayList<>());
+            }
+            categoryActivitiesMap.get(categoryId).add(activity);
+            
+            // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
         }
         
@@ -414,6 +433,7 @@ public class SummaryFragment extends Fragment {
         for (Map.Entry<Long, Double> entry : categoryTimeMap.entrySet()) {
             long categoryId = entry.getKey();
             double timeSpent = entry.getValue();
+            List<Activity> categoryActivities = categoryActivitiesMap.get(categoryId);
             
             android.util.Log.d("SummaryFragment", "Looking up category ID: " + categoryId + " with time: " + timeSpent);
             
@@ -444,7 +464,7 @@ public class SummaryFragment extends Fragment {
             }
             
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
             ));
         }
         
@@ -473,11 +493,20 @@ public class SummaryFragment extends Fragment {
         }
         
         // Group activities by category
+        Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
         for (Activity activity : activities) {
             long categoryId = activity.getCategoryId();
             double timeSpent = activity.getTimeSpentHours();
             android.util.Log.d("SummaryFragment", "Monthly Activity: ID=" + activity.getId() + ", CategoryID=" + categoryId + ", Time=" + timeSpent + "h, Notes=" + activity.getNotes());
+            
+            // Add to activities list for this category
+            if (!categoryActivitiesMap.containsKey(categoryId)) {
+                categoryActivitiesMap.put(categoryId, new ArrayList<>());
+            }
+            categoryActivitiesMap.get(categoryId).add(activity);
+            
+            // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
         }
         
@@ -488,6 +517,7 @@ public class SummaryFragment extends Fragment {
         for (Map.Entry<Long, Double> entry : categoryTimeMap.entrySet()) {
             long categoryId = entry.getKey();
             double timeSpent = entry.getValue();
+            List<Activity> categoryActivities = categoryActivitiesMap.get(categoryId);
             
             android.util.Log.d("SummaryFragment", "Looking up category ID: " + categoryId + " with time: " + timeSpent);
             
@@ -518,7 +548,7 @@ public class SummaryFragment extends Fragment {
             }
             
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
             ));
         }
         

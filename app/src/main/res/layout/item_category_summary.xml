@@ -34,6 +34,16 @@
         android:text="5.5h"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:textColor="@color/primary"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"
+        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+
+    <ImageView
+        android:id="@+id/imageViewExpand"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_expand_more"
+        android:contentDescription="Expand"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
 
@@ -49,5 +59,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
+
+    <LinearLayout
+        android:id="@+id/layoutActivitiesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBarCategory" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
