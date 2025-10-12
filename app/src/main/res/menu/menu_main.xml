@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.journal.life5to9.MainActivity">
     <item
+        android:id="@+id/action_manage_categories"
+        android:orderInCategory="90"
+        android:title="Manage Categories"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"

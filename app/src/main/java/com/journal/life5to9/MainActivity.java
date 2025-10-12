@@ -255,6 +255,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         
+        if (id == R.id.action_manage_categories) {
+            Intent manageCategoriesIntent = new Intent(this, ManageCategoriesActivity.class);
+            startActivity(manageCategoriesIntent);
+            return true;
+        }
+        
         if (id == R.id.action_settings) {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
