@@ -44,6 +44,11 @@ public class ActivityServiceImpl implements ActivityService {
     }
     
     @Override
+    public LiveData<List<Activity>> getActivitiesForWeekdays(Date weekdayStart, Date weekdayEnd) {
+        return activityRepository.getActivitiesForWeekdays(weekdayStart, weekdayEnd);
+    }
+    
+    @Override
     public LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate) {
         return activityRepository.getTotalTimeByCategory(categoryId, startDate, endDate);
     }

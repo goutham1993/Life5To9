@@ -14,6 +14,7 @@ public interface ActivityService {
     LiveData<List<Activity>> getActivitiesByCategory(long categoryId);
     LiveData<List<Activity>> getActivitiesByDateRange(Date startDate, Date endDate);
     LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay);
+    LiveData<List<Activity>> getActivitiesForWeekdays(Date weekdayStart, Date weekdayEnd);
     LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate);
     LiveData<Double> getTotalTimeByDateRange(Date startDate, Date endDate);
     LiveData<List<Activity>> getActivitiesForWeek(Date weekStart);

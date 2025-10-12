@@ -66,7 +66,7 @@ public class SummaryFragment extends Fragment {
     private com.google.android.material.button.MaterialButton buttonMonthlyNext;
     
     // Current navigation state
-    private Date currentWeekStart;
+    private Date currentWeekdayStart;
     private Date currentWeekendStart;
     private Date currentMonthStart;
     private Date originalWeekStart;
@@ -75,6 +75,7 @@ public class SummaryFragment extends Fragment {
     
     // Date formatters
     private SimpleDateFormat weekFormatter;
+    private SimpleDateFormat weekdayFormatter;
     private SimpleDateFormat weekendFormatter;
     private SimpleDateFormat monthFormatter;
     
@@ -85,6 +86,7 @@ public class SummaryFragment extends Fragment {
         
         // Initialize date formatters
         weekFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
+        weekdayFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
         weekendFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
         monthFormatter = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
     }
@@ -233,7 +235,7 @@ public class SummaryFragment extends Fragment {
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
         
-        // Get start of current week (Monday)
+        // Get start of current weekday period (Monday)
         calendar.setTime(now);
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
@@ -242,7 +244,15 @@ public class SummaryFragment extends Fragment {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        Date weekStart = calendar.getTime();
+        Date weekdayStart = calendar.getTime();
+        
+        // Calculate weekday end (Friday end of day)
+        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date weekdayEnd = calendar.getTime();
         
         // Get start of current weekend (Saturday)
         calendar.setTime(now);
@@ -264,20 +274,20 @@ public class SummaryFragment extends Fragment {
         calendar.set(Calendar.MILLISECOND, 0);
         Date monthStart = calendar.getTime();
         
-        // Debug: Log the week calculation
-        android.util.Log.d("SummaryFragment", "Week start: " + weekStart);
+        // Debug: Log the weekday calculation
+        android.util.Log.d("SummaryFragment", "Weekday start: " + weekdayStart);
         android.util.Log.d("SummaryFragment", "Current date: " + now);
         
         // Store dates for later use
-        this.weekStart = weekStart;
+        this.weekStart = weekdayStart;
         this.weekendStart = weekendStart;
         this.monthStart = monthStart;
         
         // Initialize current navigation state
-        this.currentWeekStart = weekStart;
+        this.currentWeekdayStart = weekdayStart;
         this.currentWeekendStart = weekendStart;
         this.currentMonthStart = monthStart;
-        this.originalWeekStart = weekStart;
+        this.originalWeekStart = weekdayStart;
         this.originalWeekendStart = weekendStart;
         this.originalMonthStart = monthStart;
         
@@ -301,12 +311,22 @@ public class SummaryFragment extends Fragment {
     private Date monthStart;
     
     private void observeActivities() {
-        // Observe weekly activities
-        viewModel.getActivitiesForWeek(currentWeekStart).observe(getViewLifecycleOwner(), activities -> {
-            double weeklyTotal = calculateTotalTime(activities);
-            android.util.Log.d("SummaryFragment", "Weekly activities count: " + (activities != null ? activities.size() : 0));
-            android.util.Log.d("SummaryFragment", "Weekly total: " + weeklyTotal + " hours");
-            textViewWeeklyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", weeklyTotal));
+        // Calculate weekday end date
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentWeekdayStart);
+        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date weekdayEnd = calendar.getTime();
+        
+        // Observe weekday activities (Monday-Friday)
+        viewModel.getActivitiesForWeekdays(currentWeekdayStart, weekdayEnd).observe(getViewLifecycleOwner(), activities -> {
+            double weekdayTotal = calculateTotalTime(activities);
+            android.util.Log.d("SummaryFragment", "Weekday activities count: " + (activities != null ? activities.size() : 0));
+            android.util.Log.d("SummaryFragment", "Weekday total: " + weekdayTotal + " hours");
+            textViewWeeklyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", weekdayTotal));
             updateWeeklyCategoryBreakdown(activities);
         });
         
@@ -353,14 +373,22 @@ public class SummaryFragment extends Fragment {
             layoutWeeklyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
-        // Calculate previous week dates for comparison
+        // Calculate previous weekday dates for comparison
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekStart);
+        calendar.setTime(currentWeekdayStart);
         calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        Date previousWeekStart = calendar.getTime();
+        Date previousWeekdayStart = calendar.getTime();
         
-        // Load previous week data for comparison
-        viewModel.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart).observe(getViewLifecycleOwner(), previousActivities -> {
+        // Calculate previous weekday end date
+        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date previousWeekdayEnd = calendar.getTime();
+        
+        // Load previous weekday data for comparison
+        viewModel.getActivitiesForWeekdays(previousWeekdayStart, previousWeekdayEnd).observe(getViewLifecycleOwner(), previousActivities -> {
             updateWeeklyCategoryBreakdownWithComparison(activities, previousActivities);
         });
     }
@@ -702,9 +730,9 @@ public class SummaryFragment extends Fragment {
     // Navigation methods
     private void navigateToPreviousWeek() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekStart);
+        calendar.setTime(currentWeekdayStart);
         calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        currentWeekStart = calendar.getTime();
+        currentWeekdayStart = calendar.getTime();
         
         // Re-observe activities with new date
         observeActivities();
@@ -712,9 +740,9 @@ public class SummaryFragment extends Fragment {
     
     private void navigateToNextWeek() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekStart);
+        calendar.setTime(currentWeekdayStart);
         calendar.add(Calendar.WEEK_OF_YEAR, 1);
-        currentWeekStart = calendar.getTime();
+        currentWeekdayStart = calendar.getTime();
         
         // Re-observe activities with new date
         observeActivities();
@@ -761,12 +789,12 @@ public class SummaryFragment extends Fragment {
     }
     
     private void updatePeriodLabels() {
-        // Update weekly period label
+        // Update weekday period label
         if (isCurrentWeek()) {
-            textViewWeeklyPeriod.setText("This Week");
+            textViewWeeklyPeriod.setText("This Weekday");
         } else {
-            String weekLabel = formatWeekRange(currentWeekStart);
-            textViewWeeklyPeriod.setText(weekLabel);
+            String weekdayLabel = formatWeekdayRange(currentWeekdayStart);
+            textViewWeeklyPeriod.setText(weekdayLabel);
         }
         
         // Update weekend period label
@@ -789,7 +817,7 @@ public class SummaryFragment extends Fragment {
     private boolean isCurrentWeek() {
         Calendar current = Calendar.getInstance();
         Calendar week = Calendar.getInstance();
-        week.setTime(currentWeekStart);
+        week.setTime(currentWeekdayStart);
         
         return current.get(Calendar.YEAR) == week.get(Calendar.YEAR) &&
                current.get(Calendar.WEEK_OF_YEAR) == week.get(Calendar.WEEK_OF_YEAR);
@@ -820,6 +848,21 @@ public class SummaryFragment extends Fragment {
         
         return current.get(Calendar.YEAR) == month.get(Calendar.YEAR) &&
                current.get(Calendar.MONTH) == month.get(Calendar.MONTH);
+    }
+    
+    private String formatWeekdayRange(Date weekdayStart) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(weekdayStart);
+        
+        // Format Monday to Friday range
+        String startDate = weekdayFormatter.format(weekdayStart);
+        
+        // Calculate Friday
+        calendar.add(Calendar.DAY_OF_MONTH, 4);
+        Date friday = calendar.getTime();
+        String endDate = weekdayFormatter.format(friday);
+        
+        return startDate + " - " + endDate;
     }
     
     private String formatWeekRange(Date weekStart) {

@@ -31,6 +31,9 @@ public interface ActivityDao {
     @Query("SELECT * FROM activities WHERE date >= :startOfDay AND date < :endOfDay ORDER BY createdAt DESC")
     LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay);
     
+    @Query("SELECT * FROM activities WHERE date >= :weekdayStart AND date < :weekdayEnd AND (strftime('%w', date/1000, 'unixepoch') BETWEEN '1' AND '5') ORDER BY date DESC")
+    LiveData<List<Activity>> getActivitiesForWeekdays(Date weekdayStart, Date weekdayEnd);
+    
     @Query("SELECT SUM(timeSpentHours) FROM activities WHERE categoryId = :categoryId AND date BETWEEN :startDate AND :endDate")
     LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate);
     

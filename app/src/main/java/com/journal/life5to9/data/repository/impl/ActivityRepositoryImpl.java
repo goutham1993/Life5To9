@@ -47,6 +47,11 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     }
     
     @Override
+    public LiveData<List<Activity>> getActivitiesForWeekdays(Date weekdayStart, Date weekdayEnd) {
+        return activityDao.getActivitiesForWeekdays(weekdayStart, weekdayEnd);
+    }
+    
+    @Override
     public LiveData<Double> getTotalTimeByCategory(long categoryId, Date startDate, Date endDate) {
         return activityDao.getTotalTimeByCategory(categoryId, startDate, endDate);
     }

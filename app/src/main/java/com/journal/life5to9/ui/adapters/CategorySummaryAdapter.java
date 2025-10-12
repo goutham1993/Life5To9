@@ -18,6 +18,8 @@ import com.journal.life5to9.data.entity.Activity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -305,9 +307,11 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 ));
                 timeDateRow.setPadding(0, 4, 0, 0);
                 
-                // Date (now on the left)
+                // Date with day of week (now on the left)
                 TextView dateText = new TextView(itemView.getContext());
-                dateText.setText(dateFormat.format(activity.getDate()));
+                String dayOfWeek = getDayOfWeek(activity.getDate());
+                String formattedDate = dayOfWeek + ", " + dateFormat.format(activity.getDate());
+                dateText.setText(formattedDate);
                 dateText.setTextAppearance(android.R.style.TextAppearance_Small);
                 dateText.setTextColor(secondaryTextColor);
                 dateText.setLayoutParams(new LinearLayout.LayoutParams(
@@ -326,6 +330,31 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 activityItem.addView(timeDateRow);
                 layoutActivitiesContainer.addView(activityItem);
             }
+        }
+    }
+    
+    private String getDayOfWeek(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        
+        switch (dayOfWeek) {
+            case Calendar.SUNDAY:
+                return "Sun";
+            case Calendar.MONDAY:
+                return "Mon";
+            case Calendar.TUESDAY:
+                return "Tue";
+            case Calendar.WEDNESDAY:
+                return "Wed";
+            case Calendar.THURSDAY:
+                return "Thu";
+            case Calendar.FRIDAY:
+                return "Fri";
+            case Calendar.SATURDAY:
+                return "Sat";
+            default:
+                return "";
         }
     }
 }
