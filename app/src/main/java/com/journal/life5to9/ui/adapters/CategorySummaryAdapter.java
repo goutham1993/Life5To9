@@ -213,23 +213,23 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 ));
                 timeDateRow.setPadding(0, 4, 0, 0);
                 
-                // Time
-                TextView timeText = new TextView(itemView.getContext());
-                timeText.setText(String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()));
-                timeText.setTextAppearance(android.R.style.TextAppearance_Small);
-                timeText.setTextColor(itemView.getContext().getColor(android.R.color.holo_blue_dark));
-                timeText.setLayoutParams(new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
-                ));
-                timeDateRow.addView(timeText);
-                
-                // Date
+                // Date (now on the left)
                 TextView dateText = new TextView(itemView.getContext());
                 dateText.setText(dateFormat.format(activity.getDate()));
                 dateText.setTextAppearance(android.R.style.TextAppearance_Small);
                 dateText.setTextColor(secondaryTextColor);
-                dateText.setGravity(android.view.Gravity.END);
+                dateText.setLayoutParams(new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                ));
                 timeDateRow.addView(dateText);
+                
+                // Time (now on the right)
+                TextView timeText = new TextView(itemView.getContext());
+                timeText.setText(String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()));
+                timeText.setTextAppearance(android.R.style.TextAppearance_Small);
+                timeText.setTextColor(itemView.getContext().getColor(android.R.color.holo_blue_dark));
+                timeText.setGravity(android.view.Gravity.END);
+                timeDateRow.addView(timeText);
                 
                 activityItem.addView(timeDateRow);
                 layoutActivitiesContainer.addView(activityItem);
