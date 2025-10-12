@@ -34,6 +34,10 @@ public class MainViewModel extends ViewModel {
         return activityService.getActivitiesForWeek(weekStart);
     }
     
+    public LiveData<List<Activity>> getActivitiesForWeekend(Date weekendStart) {
+        return activityService.getActivitiesForWeekend(weekendStart);
+    }
+    
     public LiveData<List<Activity>> getActivitiesForMonth(Date monthStart) {
         return activityService.getActivitiesForMonth(monthStart);
     }

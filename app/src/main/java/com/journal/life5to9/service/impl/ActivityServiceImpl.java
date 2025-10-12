@@ -80,6 +80,32 @@ public class ActivityServiceImpl implements ActivityService {
     }
     
     @Override
+    public LiveData<List<Activity>> getActivitiesForWeekend(Date weekendStart) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(weekendStart);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        
+        Date startOfWeekend = calendar.getTime();
+        
+        // Add 1 day to get to Sunday (end of weekend)
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        
+        Date endOfWeekend = calendar.getTime();
+        
+        // Debug logging
+        android.util.Log.d("ActivityServiceImpl", "Weekend range: " + startOfWeekend + " to " + endOfWeekend);
+        
+        return activityRepository.getActivitiesByDateRange(startOfWeekend, endOfWeekend);
+    }
+    
+    @Override
     public LiveData<List<Activity>> getActivitiesForMonth(Date monthStart) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(monthStart);
