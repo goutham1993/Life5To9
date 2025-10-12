@@ -336,13 +336,23 @@ public class ActivityFragment extends Fragment {
         buttonDailyView.setSelected(false);
         buttonWeeklyView.setSelected(false);
         
-        // Set selected button
+        // Reset button colors to default
+        buttonDailyView.setBackgroundTintList(null);
+        buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        buttonWeeklyView.setBackgroundTintList(null);
+        buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        
+        // Set selected button with orange highlighting
         switch (currentViewMode) {
             case VIEW_DAILY:
                 buttonDailyView.setSelected(true);
+                buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonDailyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
                 break;
             case VIEW_WEEKLY:
                 buttonWeeklyView.setSelected(true);
+                buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonWeeklyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
                 break;
         }
     }
