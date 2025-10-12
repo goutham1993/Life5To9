@@ -353,6 +353,19 @@ public class SummaryFragment extends Fragment {
             layoutWeeklyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
+        // Calculate previous week dates for comparison
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentWeekStart);
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date previousWeekStart = calendar.getTime();
+        
+        // Load previous week data for comparison
+        viewModel.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart).observe(getViewLifecycleOwner(), previousActivities -> {
+            updateWeeklyCategoryBreakdownWithComparison(activities, previousActivities);
+        });
+    }
+    
+    private void updateWeeklyCategoryBreakdownWithComparison(List<Activity> activities, List<Activity> previousActivities) {
         // Group activities by category
         Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
@@ -369,6 +382,16 @@ public class SummaryFragment extends Fragment {
             
             // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+        }
+        
+        // Group previous week activities by category for comparison
+        Map<Long, Double> previousCategoryTimeMap = new HashMap<>();
+        if (previousActivities != null) {
+            for (Activity activity : previousActivities) {
+                long categoryId = activity.getCategoryId();
+                double timeSpent = activity.getTimeSpentHours();
+                previousCategoryTimeMap.put(categoryId, previousCategoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+            }
         }
         
         // Create summary items
@@ -408,8 +431,11 @@ public class SummaryFragment extends Fragment {
                 android.util.Log.w("SummaryFragment", "Categories list is null!");
             }
             
+            // Get previous week time for this category
+            double previousTimeSpent = previousCategoryTimeMap.getOrDefault(categoryId, 0.0);
+            
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities, previousTimeSpent
             ));
         }
         
@@ -437,6 +463,19 @@ public class SummaryFragment extends Fragment {
             layoutWeekendBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
+        // Calculate previous weekend dates for comparison
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentWeekendStart);
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date previousWeekendStart = calendar.getTime();
+        
+        // Load previous weekend data for comparison
+        viewModel.getActivitiesForPreviousWeekend(previousWeekendStart, currentWeekendStart).observe(getViewLifecycleOwner(), previousActivities -> {
+            updateWeekendCategoryBreakdownWithComparison(activities, previousActivities);
+        });
+    }
+    
+    private void updateWeekendCategoryBreakdownWithComparison(List<Activity> activities, List<Activity> previousActivities) {
         // Group activities by category
         Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
@@ -453,6 +492,16 @@ public class SummaryFragment extends Fragment {
             
             // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+        }
+        
+        // Group previous weekend activities by category for comparison
+        Map<Long, Double> previousCategoryTimeMap = new HashMap<>();
+        if (previousActivities != null) {
+            for (Activity activity : previousActivities) {
+                long categoryId = activity.getCategoryId();
+                double timeSpent = activity.getTimeSpentHours();
+                previousCategoryTimeMap.put(categoryId, previousCategoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+            }
         }
         
         // Create summary items
@@ -492,8 +541,11 @@ public class SummaryFragment extends Fragment {
                 android.util.Log.w("SummaryFragment", "Categories list is null!");
             }
             
+            // Get previous weekend time for this category
+            double previousTimeSpent = previousCategoryTimeMap.getOrDefault(categoryId, 0.0);
+            
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities, previousTimeSpent
             ));
         }
         
@@ -521,6 +573,19 @@ public class SummaryFragment extends Fragment {
             layoutMonthlyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
+        // Calculate previous month dates for comparison
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentMonthStart);
+        calendar.add(Calendar.MONTH, -1);
+        Date previousMonthStart = calendar.getTime();
+        
+        // Load previous month data for comparison
+        viewModel.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart).observe(getViewLifecycleOwner(), previousActivities -> {
+            updateMonthlyCategoryBreakdownWithComparison(activities, previousActivities);
+        });
+    }
+    
+    private void updateMonthlyCategoryBreakdownWithComparison(List<Activity> activities, List<Activity> previousActivities) {
         // Group activities by category
         Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
         Map<Long, Double> categoryTimeMap = new HashMap<>();
@@ -537,6 +602,16 @@ public class SummaryFragment extends Fragment {
             
             // Add to time total
             categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+        }
+        
+        // Group previous month activities by category for comparison
+        Map<Long, Double> previousCategoryTimeMap = new HashMap<>();
+        if (previousActivities != null) {
+            for (Activity activity : previousActivities) {
+                long categoryId = activity.getCategoryId();
+                double timeSpent = activity.getTimeSpentHours();
+                previousCategoryTimeMap.put(categoryId, previousCategoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
+            }
         }
         
         // Create summary items
@@ -576,8 +651,11 @@ public class SummaryFragment extends Fragment {
                 android.util.Log.w("SummaryFragment", "Categories list is null!");
             }
             
+            // Get previous month time for this category
+            double previousTimeSpent = previousCategoryTimeMap.getOrDefault(categoryId, 0.0);
+            
             summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime, categoryActivities
+                categoryName, categoryColor, timeSpent, totalTime, categoryActivities, previousTimeSpent
             ));
         }
         

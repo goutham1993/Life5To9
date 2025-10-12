@@ -70,6 +70,19 @@ public class MainViewModel extends ViewModel {
         return activityService.getDistinctNotesByCategory(categoryId);
     }
     
+    // Previous period methods for comparisons
+    public LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart) {
+        return activityService.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart);
+    }
+    
+    public LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart) {
+        return activityService.getActivitiesForPreviousWeekend(previousWeekendStart, currentWeekendStart);
+    }
+    
+    public LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart) {
+        return activityService.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
+    }
+    
     // Category related methods
     public LiveData<List<Category>> getAllCategories() {
         return categoryService.getAllCategories();

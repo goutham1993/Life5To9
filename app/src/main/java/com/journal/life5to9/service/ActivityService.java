@@ -20,6 +20,12 @@ public interface ActivityService {
     LiveData<List<Activity>> getActivitiesForWeekend(Date weekendStart);
     LiveData<List<Activity>> getActivitiesForMonth(Date monthStart);
     LiveData<List<String>> getDistinctNotesByCategory(long categoryId);
+    
+    // Previous period methods for comparisons
+    LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart);
+    LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart);
+    LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart);
+    
     void addActivity(long categoryId, String notes, double timeSpentHours, Date date);
     void updateActivity(Activity activity);
     void deleteActivity(Activity activity);

@@ -20,4 +20,9 @@ public interface ActivityRepository {
     void deleteActivity(Activity activity);
     void deleteActivityById(long id);
     LiveData<List<String>> getDistinctNotesByCategory(long categoryId);
+    
+    // Previous period methods for comparisons
+    LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart);
+    LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart);
+    LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart);
 }

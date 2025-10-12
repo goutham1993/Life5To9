@@ -83,4 +83,19 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     public LiveData<List<String>> getDistinctNotesByCategory(long categoryId) {
         return activityDao.getDistinctNotesByCategory(categoryId);
     }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart) {
+        return activityDao.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart);
+    }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart) {
+        return activityDao.getActivitiesForPreviousWeekend(previousWeekendStart, currentWeekendStart);
+    }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart) {
+        return activityDao.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
+    }
 }

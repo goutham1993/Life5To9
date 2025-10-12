@@ -51,4 +51,14 @@ public interface ActivityDao {
     
     @Query("SELECT DISTINCT notes FROM activities WHERE categoryId = :categoryId AND notes IS NOT NULL AND notes != '' ORDER BY notes ASC")
     LiveData<List<String>> getDistinctNotesByCategory(long categoryId);
+    
+    // Previous period queries for comparisons
+    @Query("SELECT * FROM activities WHERE date >= :previousWeekStart AND date < :currentWeekStart ORDER BY date DESC")
+    LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart);
+    
+    @Query("SELECT * FROM activities WHERE date >= :previousWeekendStart AND date < :currentWeekendStart ORDER BY date DESC")
+    LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart);
+    
+    @Query("SELECT * FROM activities WHERE date >= :previousMonthStart AND date < :currentMonthStart ORDER BY date DESC")
+    LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart);
 }

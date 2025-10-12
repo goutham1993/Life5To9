@@ -34,6 +34,13 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         private List<Activity> activities;
         private boolean isExpanded;
         
+        // Comparison fields
+        private double previousTimeSpent;
+        private String trendIcon;
+        private String statusMessage;
+        private int progressPercentage;
+        private int trendColor;
+        
         public CategorySummaryItem(String categoryName, String categoryColor, double timeSpent, double totalTime, List<Activity> activities) {
             this.categoryName = categoryName;
             this.categoryColor = categoryColor;
@@ -42,6 +49,64 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             this.percentage = totalTime > 0 ? (int) ((timeSpent / totalTime) * 100) : 0;
             this.activities = activities != null ? activities : new ArrayList<>();
             this.isExpanded = false;
+            
+            // Initialize comparison fields with defaults
+            this.previousTimeSpent = 0.0;
+            this.trendIcon = "➡️";
+            this.statusMessage = "New category";
+            this.progressPercentage = 0;
+            this.trendColor = android.R.color.holo_blue_dark;
+        }
+        
+        public CategorySummaryItem(String categoryName, String categoryColor, double timeSpent, double totalTime, List<Activity> activities, double previousTimeSpent) {
+            this.categoryName = categoryName;
+            this.categoryColor = categoryColor;
+            this.timeSpent = timeSpent;
+            this.totalTime = totalTime;
+            this.percentage = totalTime > 0 ? (int) ((timeSpent / totalTime) * 100) : 0;
+            this.activities = activities != null ? activities : new ArrayList<>();
+            this.isExpanded = false;
+            this.previousTimeSpent = previousTimeSpent;
+            
+            // Calculate comparison data
+            calculateComparisonData();
+        }
+        
+        private void calculateComparisonData() {
+            if (previousTimeSpent == 0) {
+                // New category
+                trendIcon = "🆕";
+                statusMessage = "New category";
+                progressPercentage = 100;
+                trendColor = android.R.color.holo_orange_dark;
+            } else {
+                double difference = timeSpent - previousTimeSpent;
+                double percentageChange = (difference / previousTimeSpent) * 100;
+                
+                if (percentageChange > 20) {
+                    trendIcon = "🔥";
+                    statusMessage = "Hot streak!";
+                    trendColor = android.R.color.holo_green_dark;
+                } else if (percentageChange > 5) {
+                    trendIcon = "📈";
+                    statusMessage = "Trending up";
+                    trendColor = android.R.color.holo_green_light;
+                } else if (percentageChange < -20) {
+                    trendIcon = "📉";
+                    statusMessage = "Needs attention";
+                    trendColor = android.R.color.holo_red_dark;
+                } else if (percentageChange < -5) {
+                    trendIcon = "⚠️";
+                    statusMessage = "Less active";
+                    trendColor = android.R.color.holo_orange_dark;
+                } else {
+                    trendIcon = "🎯";
+                    statusMessage = "Consistent";
+                    trendColor = android.R.color.holo_blue_dark;
+                }
+                
+                progressPercentage = previousTimeSpent > 0 ? (int) ((timeSpent / previousTimeSpent) * 100) : 100;
+            }
         }
         
         // Getters
@@ -52,6 +117,13 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         public int getPercentage() { return percentage; }
         public List<Activity> getActivities() { return activities; }
         public boolean isExpanded() { return isExpanded; }
+        
+        // Comparison getters
+        public double getPreviousTimeSpent() { return previousTimeSpent; }
+        public String getTrendIcon() { return trendIcon; }
+        public String getStatusMessage() { return statusMessage; }
+        public int getProgressPercentage() { return progressPercentage; }
+        public int getTrendColor() { return trendColor; }
         
         // Setters
         public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
@@ -100,8 +172,22 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         }
         
         public void bind(CategorySummaryItem item) {
+            // Display category name without trend icon for cleaner look
             textViewCategoryName.setText(item.getCategoryName());
-            textViewTimeSpent.setText(String.format(Locale.getDefault(), "%.1fh", item.getTimeSpent()));
+            
+            // Display time with comparison
+            String timeDisplay = String.format(Locale.getDefault(), "%.1fh", item.getTimeSpent());
+            if (item.getPreviousTimeSpent() > 0) {
+                double difference = item.getTimeSpent() - item.getPreviousTimeSpent();
+                String trendText = difference > 0 ? "+" + String.format(Locale.getDefault(), "%.1fh", difference) : 
+                                 String.format(Locale.getDefault(), "%.1fh", difference);
+                timeDisplay += " (" + trendText + ")";
+            }
+            textViewTimeSpent.setText(timeDisplay);
+            
+            // Set trend color for time text
+            int trendColor = itemView.getContext().getColor(item.getTrendColor());
+            textViewTimeSpent.setTextColor(trendColor);
             
             // Set category color
             try {
@@ -114,8 +200,8 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                 progressBarCategory.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF2E7D32")));
             }
             
-            // Set progress
-            progressBarCategory.setProgress(item.getPercentage());
+            // Set progress based on comparison (current vs previous)
+            progressBarCategory.setProgress(item.getProgressPercentage());
             
             // Setup expand/collapse functionality
             itemView.setOnClickListener(v -> {

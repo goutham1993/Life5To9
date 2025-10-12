@@ -154,4 +154,19 @@ public class ActivityServiceImpl implements ActivityService {
     public LiveData<List<String>> getDistinctNotesByCategory(long categoryId) {
         return activityRepository.getDistinctNotesByCategory(categoryId);
     }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart) {
+        return activityRepository.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart);
+    }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart) {
+        return activityRepository.getActivitiesForPreviousWeekend(previousWeekendStart, currentWeekendStart);
+    }
+    
+    @Override
+    public LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart) {
+        return activityRepository.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
+    }
 }
