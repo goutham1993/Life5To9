@@ -346,6 +346,8 @@
                             android:id="@+id/recyclerViewMonthlyCategoryBreakdown"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:minHeight="600dp"
+                            android:maxHeight="800dp"
                             tools:listitem="@layout/item_category_summary" />
 
                     </LinearLayout>
