@@ -321,7 +321,16 @@ public class SummaryFragment extends Fragment {
         // Get start of current weekend (Saturday)
         calendar.setTime(now);
         int dayOfWeekForWeekend = calendar.get(Calendar.DAY_OF_WEEK);
-        int daysFromSaturday = (dayOfWeekForWeekend == Calendar.SUNDAY) ? 1 : (dayOfWeekForWeekend == Calendar.SATURDAY) ? 0 : 7 - dayOfWeekForWeekend + Calendar.SATURDAY;
+        // Calculate days to subtract to get to Saturday
+        int daysFromSaturday;
+        if (dayOfWeekForWeekend == Calendar.SATURDAY) {
+            daysFromSaturday = 0; // Already Saturday
+        } else if (dayOfWeekForWeekend == Calendar.SUNDAY) {
+            daysFromSaturday = 1; // Go back 1 day to Saturday
+        } else {
+            // For Monday (2) to Friday (6), calculate days to previous Saturday
+            daysFromSaturday = dayOfWeekForWeekend - Calendar.SATURDAY;
+        }
         calendar.add(Calendar.DAY_OF_MONTH, -daysFromSaturday);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
@@ -340,7 +349,10 @@ public class SummaryFragment extends Fragment {
         
         // Debug: Log the weekday calculation
         android.util.Log.d("SummaryFragment", "Weekday start: " + weekdayStart);
+        android.util.Log.d("SummaryFragment", "Weekend start: " + weekendStart);
         android.util.Log.d("SummaryFragment", "Current date: " + now);
+        android.util.Log.d("SummaryFragment", "Day of week: " + dayOfWeekForWeekend + " (1=Sunday, 7=Saturday)");
+        android.util.Log.d("SummaryFragment", "Days from Saturday: " + daysFromSaturday);
         
         // Store dates for later use
         this.weekStart = weekdayStart;
