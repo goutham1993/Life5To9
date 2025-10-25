@@ -342,7 +342,11 @@ public class ActivityFragment extends Fragment {
         buttonWeeklyView.setBackgroundTintList(null);
         buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
         
-        // Set selected button with orange highlighting
+        // Check if dark theme is enabled
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        
+        // Set selected button with appropriate highlighting
         switch (currentViewMode) {
             case VIEW_DAILY:
                 buttonDailyView.setSelected(true);
@@ -351,6 +355,7 @@ public class ActivityFragment extends Fragment {
                 break;
             case VIEW_WEEKLY:
                 buttonWeeklyView.setSelected(true);
+                // Weekly button should use orange background when selected (same as daily)
                 buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonWeeklyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
                 break;
