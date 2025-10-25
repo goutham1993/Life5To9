@@ -5,9 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -59,8 +61,8 @@ public class CategoriesFragment extends Fragment {
             
             @Override
             public void onCategoryLongClick(Category category) {
-                // Handle long click - could show edit/delete options
-                // TODO: Implement edit/delete category functionality
+                // Show delete confirmation dialog
+                showDeleteCategoryDialog(category);
             }
         });
         
@@ -90,5 +92,28 @@ public class CategoriesFragment extends Fragment {
         });
         
         dialog.show(getParentFragmentManager(), "AddCategoryDialog");
+    }
+    
+    private void showDeleteCategoryDialog(Category category) {
+        // Don't allow deletion of default categories
+        if (category.isDefault()) {
+            Toast.makeText(getContext(), "Default categories cannot be deleted", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Delete Category")
+                .setMessage("Are you sure you want to delete the category \"" + category.getName() + "\"?\n\n" +
+                        "⚠️ WARNING: All activities associated with this category will lose their category reference and may not be visible in category-based views.\n\n" +
+                        "This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    // Delete the category
+                    viewModel.deleteCategory(category);
+                    Toast.makeText(getContext(), "Category deleted successfully", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Do nothing, just dismiss the dialog
+                })
+                .show();
     }
 }
