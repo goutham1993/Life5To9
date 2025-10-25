@@ -336,9 +336,11 @@ public class ActivityFragment extends Fragment {
         buttonDailyView.setSelected(false);
         buttonWeeklyView.setSelected(false);
         
-        // Reset button colors to default
+        // Reset button colors to default Material3 OutlinedButton state
+        // Only reset tint and text color, keep the Material3 background
         buttonDailyView.setBackgroundTintList(null);
         buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        
         buttonWeeklyView.setBackgroundTintList(null);
         buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
         
@@ -352,12 +354,22 @@ public class ActivityFragment extends Fragment {
                 buttonDailyView.setSelected(true);
                 buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonDailyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                
+                // Set weekly button to unselected state
+                buttonWeeklyView.setSelected(false);
+                buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
                 break;
+                
             case VIEW_WEEKLY:
                 buttonWeeklyView.setSelected(true);
-                // Weekly button should use orange background when selected (same as daily)
                 buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonWeeklyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                
+                // Set daily button to unselected state
+                buttonDailyView.setSelected(false);
+                buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
                 break;
         }
     }

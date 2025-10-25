@@ -61,7 +61,7 @@ public class SummaryFragment extends Fragment {
     private static final int MONTHLY_TAB_WEEKDAY = 0;
     private static final int MONTHLY_TAB_WEEKEND = 1;
     private static final int MONTHLY_TAB_ALL = 2;
-    private int currentMonthlyTabMode = MONTHLY_TAB_WEEKDAY;
+    private int currentMonthlyTabMode = MONTHLY_TAB_ALL;
     
     // Store current monthly activities for tab filtering
     private List<Activity> currentMonthlyActivities = new ArrayList<>();
@@ -274,22 +274,51 @@ public class SummaryFragment extends Fragment {
         buttonMonthlyAll.setBackgroundTintList(null);
         buttonMonthlyAll.setTextColor(getResources().getColorStateList(R.color.primary, null));
         
-        // Set selected button with orange highlighting
+        // Set selected button with orange highlighting and unselected buttons with white background
         switch (currentMonthlyTabMode) {
             case MONTHLY_TAB_WEEKDAY:
                 buttonMonthlyWeekday.setSelected(true);
                 buttonMonthlyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                
+                // Set other buttons to unselected state
+                buttonMonthlyWeekend.setSelected(false);
+                buttonMonthlyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                
+                buttonMonthlyAll.setSelected(false);
+                buttonMonthlyAll.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyAll.setTextColor(getResources().getColorStateList(R.color.primary, null));
                 break;
+                
             case MONTHLY_TAB_WEEKEND:
                 buttonMonthlyWeekend.setSelected(true);
                 buttonMonthlyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                
+                // Set other buttons to unselected state
+                buttonMonthlyWeekday.setSelected(false);
+                buttonMonthlyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                
+                buttonMonthlyAll.setSelected(false);
+                buttonMonthlyAll.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyAll.setTextColor(getResources().getColorStateList(R.color.primary, null));
                 break;
+                
             case MONTHLY_TAB_ALL:
                 buttonMonthlyAll.setSelected(true);
                 buttonMonthlyAll.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyAll.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                
+                // Set other buttons to unselected state
+                buttonMonthlyWeekday.setSelected(false);
+                buttonMonthlyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                
+                buttonMonthlyWeekend.setSelected(false);
+                buttonMonthlyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(R.color.primary, null));
                 break;
         }
     }
