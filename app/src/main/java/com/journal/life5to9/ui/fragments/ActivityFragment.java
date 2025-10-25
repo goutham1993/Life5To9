@@ -355,10 +355,15 @@ public class ActivityFragment extends Fragment {
                 buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonDailyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
                 
-                // Set weekly button to unselected state
+                // Set weekly button to unselected state with theme-aware background
                 buttonWeeklyView.setSelected(false);
-                buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
-                buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                if (isDarkTheme) {
+                    buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.surface_variant, null));
+                    buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.on_surface_variant, null));
+                } else {
+                    buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                    buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                }
                 break;
                 
             case VIEW_WEEKLY:
@@ -366,10 +371,15 @@ public class ActivityFragment extends Fragment {
                 buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonWeeklyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
                 
-                // Set daily button to unselected state
+                // Set daily button to unselected state with theme-aware background
                 buttonDailyView.setSelected(false);
-                buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
-                buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                if (isDarkTheme) {
+                    buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.surface_variant, null));
+                    buttonDailyView.setTextColor(getResources().getColorStateList(R.color.on_surface_variant, null));
+                } else {
+                    buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+                    buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
+                }
                 break;
         }
     }
