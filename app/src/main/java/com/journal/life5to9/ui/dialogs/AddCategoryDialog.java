@@ -13,6 +13,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.journal.life5to9.R;
+import com.journal.life5to9.data.entity.Category;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,13 @@ public class AddCategoryDialog extends DialogFragment {
         void onCategoryAdded(String name, String description, String color, String icon);
     }
     
+    public interface OnDismissListener {
+        void onDismiss();
+    }
+    
     private OnCategoryAddedListener listener;
+    private OnDismissListener dismissListener;
+    private List<Category> existingCategories;
     
     private TextInputEditText editTextCategoryName;
     private TextInputEditText editTextCategoryDescription;
@@ -50,6 +57,14 @@ public class AddCategoryDialog extends DialogFragment {
     
     public void setOnCategoryAddedListener(OnCategoryAddedListener listener) {
         this.listener = listener;
+    }
+    
+    public void setOnDismissListener(OnDismissListener dismissListener) {
+        this.dismissListener = dismissListener;
+    }
+    
+    public void setExistingCategories(List<Category> existingCategories) {
+        this.existingCategories = existingCategories;
     }
     
     @NonNull
@@ -106,6 +121,16 @@ public class AddCategoryDialog extends DialogFragment {
             return false;
         }
         
+        // Check for duplicate category names (case-insensitive)
+        if (existingCategories != null) {
+            for (Category category : existingCategories) {
+                if (category.getName().equalsIgnoreCase(name)) {
+                    Toast.makeText(requireContext(), "A category with this name already exists", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+        }
+        
         return true;
     }
     
@@ -128,5 +153,13 @@ public class AddCategoryDialog extends DialogFragment {
         }
         
         dismiss();
+    }
+    
+    @Override
+    public void onDismiss(@NonNull android.content.DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (dismissListener != null) {
+            dismissListener.onDismiss();
+        }
     }
 }

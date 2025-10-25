@@ -38,6 +38,12 @@ public class CategoryServiceImpl implements CategoryService {
     
     @Override
     public void addCategory(String name, String color, String icon) {
+        // Check if category name already exists
+        if (categoryRepository.isCategoryNameExists(name)) {
+            // Category already exists, don't add it
+            return;
+        }
+        
         Category category = new Category(name, color, icon, false);
         categoryRepository.insertCategory(category);
     }

@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPagerAdapter viewPagerAdapter;
     private MainViewModel viewModel;
     private ActivityFragment activityFragment;
+    private boolean isAddActivityDialogShowing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +148,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddActivityDialog() {
+        // Check if dialog is already showing
+        if (isAddActivityDialogShowing) {
+            return; // Dialog is already showing, don't show another one
+        }
+        
+        // Dismiss any existing dialog first
+        DialogFragment existingDialog = (DialogFragment) getSupportFragmentManager().findFragmentByTag("AddActivityDialog");
+        if (existingDialog != null) {
+            existingDialog.dismiss();
+        }
+        
+        isAddActivityDialogShowing = true;
         AddActivityDialog dialog = AddActivityDialog.newInstance();
         
         // Get the selected date from the ActivityFragment
@@ -163,6 +177,14 @@ public class MainActivity extends AppCompatActivity {
             
             // Force refresh of activities list
             refreshActivitiesList();
+            
+            // Reset the flag when dialog is dismissed
+            isAddActivityDialogShowing = false;
+        });
+        
+        // Add dismiss listener to reset flag
+        dialog.setOnDismissListener(() -> {
+            isAddActivityDialogShowing = false;
         });
         
         // Load categories first, then show dialog
@@ -268,5 +290,9 @@ public class MainActivity extends AppCompatActivity {
         }
         
         return super.onOptionsItemSelected(item);
+    }
+    
+    public MainViewModel getViewModel() {
+        return viewModel;
     }
 }

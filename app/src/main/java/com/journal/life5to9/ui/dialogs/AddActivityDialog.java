@@ -36,7 +36,12 @@ public class AddActivityDialog extends DialogFragment {
         void onActivityAdded(long categoryId, String notes, double timeSpent, Date date);
     }
     
+    public interface OnDismissListener {
+        void onDismiss();
+    }
+    
     private OnActivityAddedListener listener;
+    private OnDismissListener dismissListener;
     private List<Category> categories = new ArrayList<>();
     private ArrayAdapter<String> categoryAdapter;
     private ArrayAdapter<String> notesAdapter;
@@ -48,12 +53,14 @@ public class AddActivityDialog extends DialogFragment {
     private TextInputEditText editTextTime;
     private Button buttonCancel;
     private Button buttonSave;
+    private Button buttonAddCategory;
     
     private Date selectedDate;
     private int selectedCategoryId = -1;
     private boolean isDatePreSelected = false;
     private int selectedHour = 17; // Default to 5 PM
     private int selectedMinute = 0;
+    private boolean isAddCategoryDialogShowing = false;
     
     public static AddActivityDialog newInstance() {
         return new AddActivityDialog();
@@ -76,6 +83,10 @@ public class AddActivityDialog extends DialogFragment {
     
     public void setOnActivityAddedListener(OnActivityAddedListener listener) {
         this.listener = listener;
+    }
+    
+    public void setOnDismissListener(OnDismissListener dismissListener) {
+        this.dismissListener = dismissListener;
     }
     
     public void setSelectedDate(Date date) {
@@ -121,6 +132,7 @@ public class AddActivityDialog extends DialogFragment {
         editTextTime = view.findViewById(R.id.editTextTime);
         buttonCancel = view.findViewById(R.id.buttonCancel);
         buttonSave = view.findViewById(R.id.buttonSave);
+        buttonAddCategory = view.findViewById(R.id.buttonAddCategory);
     }
     
     private void setupDateAndTime() {
@@ -262,6 +274,8 @@ public class AddActivityDialog extends DialogFragment {
                 saveActivity();
             }
         });
+        
+        buttonAddCategory.setOnClickListener(v -> showAddCategoryDialog());
     }
     
     private boolean validateInput() {
@@ -379,5 +393,72 @@ public class AddActivityDialog extends DialogFragment {
         
         SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
         editTextTime.setText(timeFormat.format(dateWithTime));
+    }
+    
+    private void showAddCategoryDialog() {
+        // Check if dialog is already showing
+        if (isAddCategoryDialogShowing) {
+            return; // Dialog is already showing, don't show another one
+        }
+        
+        // Dismiss any existing dialog first
+        DialogFragment existingDialog = (DialogFragment) getParentFragmentManager().findFragmentByTag("AddCategoryDialog");
+        if (existingDialog != null) {
+            existingDialog.dismiss();
+        }
+        
+        isAddCategoryDialogShowing = true;
+        AddCategoryDialog addCategoryDialog = new AddCategoryDialog();
+        addCategoryDialog.setExistingCategories(categories);
+        addCategoryDialog.setOnCategoryAddedListener((name, description, color, icon) -> {
+            // Add the new category to the database via ViewModel
+            if (getActivity() instanceof com.journal.life5to9.MainActivity) {
+                com.journal.life5to9.MainActivity mainActivity = (com.journal.life5to9.MainActivity) getActivity();
+                mainActivity.getViewModel().addCategory(name, color, icon);
+            }
+            
+            // Add the new category to the local list
+            Category newCategory = new Category(name, color, icon, false);
+            categories.add(newCategory);
+            
+            // Update the category adapter
+            updateCategoryAdapter();
+            
+            // Auto-select the newly added category
+            String emoji = CategoryEmojiMapper.getEmojiForCategory(name);
+            String categoryText = emoji + " " + name;
+            autoCompleteCategory.setText(categoryText, false);
+            
+            // Find and set the selected category ID
+            for (Category category : categories) {
+                if (category.getName().equals(name)) {
+                    selectedCategoryId = (int) category.getId();
+                    break;
+                }
+            }
+            
+            Toast.makeText(requireContext(), "Category added successfully!", Toast.LENGTH_SHORT).show();
+            
+            // Reset the flag when dialog is dismissed
+            isAddCategoryDialogShowing = false;
+            
+            // Close both dialogs and return to main activity
+            dismiss();
+        });
+        
+        // Add dismiss listener to reset flag
+        addCategoryDialog.setOnDismissListener(() -> {
+            isAddCategoryDialogShowing = false;
+        });
+        
+        addCategoryDialog.show(getParentFragmentManager(), "AddCategoryDialog");
+    }
+    
+    @Override
+    public void onDismiss(@NonNull android.content.DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (dismissListener != null) {
+            dismissListener.onDismiss();
+        }
     }
 }

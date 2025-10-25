@@ -42,6 +42,6 @@ public interface CategoryDao {
     @Query("DELETE FROM categories WHERE id = :id")
     void deleteCategoryById(long id);
     
-    @Query("SELECT COUNT(*) FROM categories WHERE name = :name")
+    @Query("SELECT COUNT(*) FROM categories WHERE LOWER(name) = LOWER(:name)")
     int getCategoryCountByName(String name);
 }

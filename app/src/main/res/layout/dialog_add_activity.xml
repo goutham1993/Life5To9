@@ -15,23 +15,41 @@
         android:textColor="@color/on_surface" />
 
     <!-- Category Selection -->
-    <com.google.android.material.textfield.TextInputLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:startIconDrawable="@android:drawable/ic_menu_sort_by_size">
+        android:orientation="horizontal">
 
-        <AutoCompleteTextView
-            android:id="@+id/autoCompleteCategory"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:hint="Select a category"
-            android:completionThreshold="0"
-            android:focusable="true"
-            android:clickable="true" />
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:startIconDrawable="@android:drawable/ic_menu_sort_by_size">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <AutoCompleteTextView
+                android:id="@+id/autoCompleteCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:hint="Select a category"
+                android:completionThreshold="0"
+                android:focusable="true"
+                android:clickable="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAddCategory"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Add"
+            android:textSize="12sp"
+            android:minWidth="80dp" />
+
+    </LinearLayout>
 
     <!-- Notes -->
     <com.google.android.material.textfield.TextInputLayout
