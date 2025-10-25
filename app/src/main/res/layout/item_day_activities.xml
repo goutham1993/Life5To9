@@ -64,6 +64,19 @@
 
         </LinearLayout>
 
+        <!-- Category Preview -->
+        <TextView
+            android:id="@+id/textViewCategoryPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            android:text="💼 Work, 📚 Learning, 💪 Fitness"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurface"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
         <!-- Activities List -->
         <LinearLayout
             android:id="@+id/layoutActivities"

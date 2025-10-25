@@ -14,15 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.journal.life5to9.R;
 import com.journal.life5to9.data.entity.Activity;
 import com.journal.life5to9.data.entity.Category;
+import com.journal.life5to9.utils.CategoryEmojiMapper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class DayActivitiesAdapter extends RecyclerView.Adapter<DayActivitiesAdapter.DayViewHolder> {
 
@@ -76,6 +79,7 @@ public class DayActivitiesAdapter extends RecyclerView.Adapter<DayActivitiesAdap
         private TextView textViewDayName;
         private TextView textViewDayDate;
         private TextView textViewDayTotal;
+        private TextView textViewCategoryPreview;
         private LinearLayout layoutActivities;
         private TextView textViewNoActivities;
         private LinearLayout layoutDayHeader;
@@ -86,6 +90,7 @@ public class DayActivitiesAdapter extends RecyclerView.Adapter<DayActivitiesAdap
             textViewDayName = itemView.findViewById(R.id.textViewDayName);
             textViewDayDate = itemView.findViewById(R.id.textViewDayDate);
             textViewDayTotal = itemView.findViewById(R.id.textViewDayTotal);
+            textViewCategoryPreview = itemView.findViewById(R.id.textViewCategoryPreview);
             layoutActivities = itemView.findViewById(R.id.layoutActivities);
             textViewNoActivities = itemView.findViewById(R.id.textViewNoActivities);
             layoutDayHeader = itemView.findViewById(R.id.layoutDayHeader);
@@ -103,6 +108,10 @@ public class DayActivitiesAdapter extends RecyclerView.Adapter<DayActivitiesAdap
                 totalTime += activity.getTimeSpentHours();
             }
             textViewDayTotal.setText(String.format(Locale.getDefault(), "%.1fh", totalTime));
+
+            // Generate category preview
+            String categoryPreview = generateCategoryPreview(dayActivities.getActivities());
+            textViewCategoryPreview.setText(categoryPreview);
 
             // Set up click listener for expand/collapse
             layoutDayHeader.setOnClickListener(v -> {
@@ -170,6 +179,29 @@ public class DayActivitiesAdapter extends RecyclerView.Adapter<DayActivitiesAdap
             textViewTimeSpent.setText(String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()));
 
             return view;
+        }
+
+        private String generateCategoryPreview(List<Activity> activities) {
+            if (activities == null || activities.isEmpty()) {
+                return "No activities";
+            }
+
+            // Collect unique category names with emojis
+            Set<String> categoryNamesWithEmojis = new LinkedHashSet<>();
+            for (Activity activity : activities) {
+                Category category = categoryMap.get(activity.getCategoryId());
+                if (category != null) {
+                    String emoji = CategoryEmojiMapper.getEmojiForCategory(category.getName());
+                    categoryNamesWithEmojis.add(emoji + " " + category.getName());
+                }
+            }
+
+            if (categoryNamesWithEmojis.isEmpty()) {
+                return "📝 Unknown categories";
+            }
+
+            // Join category names with emojis with commas
+            return String.join(", ", categoryNamesWithEmojis);
         }
     }
 
