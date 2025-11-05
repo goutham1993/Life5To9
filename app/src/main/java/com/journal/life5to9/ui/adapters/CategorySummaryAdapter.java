@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummaryAdapter.CategorySummaryViewHolder> {
     
@@ -122,6 +124,21 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         public List<Activity> getActivities() { return activities; }
         public boolean isExpanded() { return isExpanded; }
         
+        // Calculate unique days count
+        public int getDaysCount() {
+            if (activities == null || activities.isEmpty()) {
+                return 0;
+            }
+            Set<String> uniqueDays = new HashSet<>();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            for (Activity activity : activities) {
+                if (activity.getDate() != null) {
+                    uniqueDays.add(dateFormat.format(activity.getDate()));
+                }
+            }
+            return uniqueDays.size();
+        }
+        
         // Comparison getters
         public double getPreviousTimeSpent() { return previousTimeSpent; }
         public String getTrendIcon() { return trendIcon; }
@@ -161,6 +178,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         private View viewCategoryColor;
         private TextView textViewCategoryName;
         private TextView textViewTimeSpent;
+        private TextView textViewDaysAndPercentage;
         private ProgressBar progressBarCategory;
         private ImageView imageViewExpand;
         private LinearLayout layoutActivitiesContainer;
@@ -173,6 +191,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             viewCategoryColor = itemView.findViewById(R.id.viewCategoryColor);
             textViewCategoryName = itemView.findViewById(R.id.textViewCategoryName);
             textViewTimeSpent = itemView.findViewById(R.id.textViewTimeSpent);
+            textViewDaysAndPercentage = itemView.findViewById(R.id.textViewDaysAndPercentage);
             progressBarCategory = itemView.findViewById(R.id.progressBarCategory);
             imageViewExpand = itemView.findViewById(R.id.imageViewExpand);
             layoutActivitiesContainer = itemView.findViewById(R.id.layoutActivitiesContainer);
@@ -182,7 +201,15 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             // Display category name without trend icon for cleaner look
             textViewCategoryName.setText(item.getCategoryName());
             
-            // Display time with comparison and percentage
+            // Display percentage on top line (right side)
+            String percentageText = String.format(Locale.getDefault(), "%d%%", item.getPercentage());
+            textViewTimeSpent.setText(percentageText);
+            
+            // Set trend color for percentage text
+            int trendColor = itemView.getContext().getColor(item.getTrendColor());
+            textViewTimeSpent.setTextColor(trendColor);
+            
+            // Display hours with comparison and days count on second line
             String timeDisplay = String.format(Locale.getDefault(), "%.1fh", item.getTimeSpent());
             if (item.getPreviousTimeSpent() > 0) {
                 double difference = item.getTimeSpent() - item.getPreviousTimeSpent();
@@ -190,13 +217,10 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
                                  String.format(Locale.getDefault(), "%.1fh", difference);
                 timeDisplay += " (" + trendText + ")";
             }
-            // Add percentage to the display
-            timeDisplay += " - " + item.getPercentage() + "%";
-            textViewTimeSpent.setText(timeDisplay);
             
-            // Set trend color for time text
-            int trendColor = itemView.getContext().getColor(item.getTrendColor());
-            textViewTimeSpent.setTextColor(trendColor);
+            int daysCount = item.getDaysCount();
+            String hoursAndDaysText = String.format(Locale.getDefault(), "%s • %d days", timeDisplay, daysCount);
+            textViewDaysAndPercentage.setText(hoursAndDaysText);
             
             // Set category color
             try {

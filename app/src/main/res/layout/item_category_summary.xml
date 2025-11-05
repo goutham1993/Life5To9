@@ -28,10 +28,22 @@
         app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
 
     <TextView
+        android:id="@+id/textViewDaysAndPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:text="5.5h (+1.2h) • 12 days"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+        android:textColor="@color/on_surface_variant"
+        app:layout_constraintStart_toEndOf="@+id/viewCategoryColor"
+        app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
+
+    <TextView
         android:id="@+id/textViewTimeSpent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5.5h"
+        android:text="45%"
         android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
         android:textColor="@color/primary"
         app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"
@@ -58,7 +70,7 @@
         android:progressTint="@color/primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewDaysAndPercentage" />
 
     <LinearLayout
         android:id="@+id/layoutActivitiesContainer"
