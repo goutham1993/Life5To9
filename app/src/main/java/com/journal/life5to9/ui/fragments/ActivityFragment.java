@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.journal.life5to9.R;
@@ -20,6 +21,7 @@ import com.journal.life5to9.data.entity.Activity;
 import com.journal.life5to9.data.entity.Category;
 import com.journal.life5to9.ui.adapters.ActivityAdapter;
 import com.journal.life5to9.ui.adapters.DayActivitiesAdapter;
+import com.journal.life5to9.ui.adapters.RecentActivityQuickAddAdapter;
 import com.journal.life5to9.ui.dialogs.EditActivityDialog;
 import com.journal.life5to9.viewmodel.MainViewModel;
 
@@ -46,6 +48,9 @@ public class ActivityFragment extends Fragment {
     private MaterialButton buttonWeeklyView;
     private ActivityAdapter adapter;
     private DayActivitiesAdapter dayAdapter;
+    private RecentActivityQuickAddAdapter recentActivityAdapter;
+    private RecyclerView recyclerViewRecentActivities;
+    private com.google.android.material.card.MaterialCardView cardRecentActivities;
     private List<Category> categories;
     
     private Date selectedDate;
@@ -96,6 +101,8 @@ public class ActivityFragment extends Fragment {
         buttonNextDay = view.findViewById(R.id.buttonNextDay);
         buttonDailyView = view.findViewById(R.id.buttonDailyView);
         buttonWeeklyView = view.findViewById(R.id.buttonWeeklyView);
+        recyclerViewRecentActivities = view.findViewById(R.id.recyclerViewRecentActivities);
+        cardRecentActivities = view.findViewById(R.id.cardRecentActivities);
         
         // Set initial date display
         updateSelectedDateDisplay();
@@ -122,6 +129,16 @@ public class ActivityFragment extends Fragment {
         
         // Initialize day adapter for weekly view
         dayAdapter = new DayActivitiesAdapter(getContext());
+        
+        // Initialize recent activities adapter
+        recentActivityAdapter = new RecentActivityQuickAddAdapter();
+        recentActivityAdapter.setOnRecentActivityClickListener(activity -> {
+            quickAddActivity(activity);
+        });
+        
+        // Setup recent activities RecyclerView (horizontal)
+        recyclerViewRecentActivities.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewRecentActivities.setAdapter(recentActivityAdapter);
         
         recyclerViewActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewActivities.setAdapter(adapter);
@@ -235,6 +252,8 @@ public class ActivityFragment extends Fragment {
     private void observeData() {
         // Load activities for the initially selected view mode
         loadActivitiesForCurrentView();
+        // Load recent activities for quick add
+        loadRecentActivities();
     }
     
     private void loadCategories() {
@@ -242,6 +261,54 @@ public class ActivityFragment extends Fragment {
             if (categories != null && adapter != null) {
                 this.categories = categories;
                 adapter.setCategories(categories);
+                if (recentActivityAdapter != null) {
+                    recentActivityAdapter.setCategories(categories);
+                }
+            }
+        });
+    }
+    
+    private void quickAddActivity(Activity activity) {
+        // Create a new activity with the same category, notes, and time spent
+        // but with the current selected date and time
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(selectedDate);
+        
+        // Use current time for the activity
+        Calendar now = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
+        cal.set(Calendar.MINUTE, now.get(Calendar.MINUTE));
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        
+        Date activityDate = cal.getTime();
+        
+        // Add the activity
+        viewModel.addActivity(
+            activity.getCategoryId(),
+            activity.getNotes(),
+            activity.getTimeSpentHours(),
+            activityDate
+        );
+        
+        // Show success message
+        Toast.makeText(getContext(), "Activity added successfully!", Toast.LENGTH_SHORT).show();
+        
+        // Refresh the activities list
+        loadActivitiesForSelectedDate();
+    }
+    
+    private void loadRecentActivities() {
+        viewModel.getRecentActivities(5).observe(getViewLifecycleOwner(), activities -> {
+            if (activities != null && !activities.isEmpty() && recentActivityAdapter != null) {
+                recentActivityAdapter.setActivities(activities);
+                if (currentViewMode == VIEW_DAILY) {
+                    cardRecentActivities.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if (currentViewMode == VIEW_DAILY && (activities == null || activities.isEmpty())) {
+                    cardRecentActivities.setVisibility(View.GONE);
+                }
             }
         });
     }
@@ -328,6 +395,14 @@ public class ActivityFragment extends Fragment {
         updateViewSelector();
         updateDateHeaderVisibility();
         updateSelectedDateDisplay(); // Add this to update the display when switching views
+        
+        // Show/hide recent activities section based on view mode
+        if (viewMode == VIEW_DAILY) {
+            loadRecentActivities();
+        } else {
+            cardRecentActivities.setVisibility(View.GONE);
+        }
+        
         loadActivitiesForCurrentView();
     }
     
@@ -391,6 +466,9 @@ public class ActivityFragment extends Fragment {
         buttonSelectDate.setVisibility(View.VISIBLE);
         buttonPreviousDay.setVisibility(View.VISIBLE);
         buttonNextDay.setVisibility(View.VISIBLE);
+        
+        // Show/hide recent activities section based on view mode
+        // The visibility is managed by loadRecentActivities() method
     }
     
     private void loadActivitiesForCurrentView() {
@@ -409,6 +487,8 @@ public class ActivityFragment extends Fragment {
         recyclerViewActivities.setAdapter(adapter);
         // Load activities for the selected date (same as current implementation)
         loadActivitiesForSelectedDate();
+        // Load recent activities for quick add
+        loadRecentActivities();
     }
     
     private void loadWeeklyActivities() {

@@ -91,6 +91,10 @@ public class MainViewModel extends ViewModel {
         return activityService.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
     }
     
+    public LiveData<List<Activity>> getRecentActivities(int limit) {
+        return activityService.getRecentActivities(limit);
+    }
+    
     // Category related methods
     public LiveData<List<Category>> getAllCategories() {
         return categoryService.getAllCategories();

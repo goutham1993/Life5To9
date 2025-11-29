@@ -67,4 +67,7 @@ public interface ActivityDao {
     
     @Query("SELECT * FROM activities WHERE date >= :previousMonthStart AND date < :currentMonthStart ORDER BY date DESC")
     LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart);
+    
+    @Query("SELECT * FROM activities ORDER BY createdAt DESC LIMIT :limit")
+    LiveData<List<Activity>> getRecentActivities(int limit);
 }

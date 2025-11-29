@@ -26,4 +26,7 @@ public interface ActivityRepository {
     LiveData<List<Activity>> getActivitiesForPreviousWeek(Date previousWeekStart, Date currentWeekStart);
     LiveData<List<Activity>> getActivitiesForPreviousWeekend(Date previousWeekendStart, Date currentWeekendStart);
     LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart);
+    
+    // Recent activities for quick add
+    LiveData<List<Activity>> getRecentActivities(int limit);
 }

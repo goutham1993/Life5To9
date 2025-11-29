@@ -103,4 +103,9 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     public LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart) {
         return activityDao.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
     }
+    
+    @Override
+    public LiveData<List<Activity>> getRecentActivities(int limit) {
+        return activityDao.getRecentActivities(limit);
+    }
 }

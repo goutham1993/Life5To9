@@ -174,4 +174,9 @@ public class ActivityServiceImpl implements ActivityService {
     public LiveData<List<Activity>> getActivitiesForPreviousMonth(Date previousMonthStart, Date currentMonthStart) {
         return activityRepository.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart);
     }
+    
+    @Override
+    public LiveData<List<Activity>> getRecentActivities(int limit) {
+        return activityRepository.getRecentActivities(limit);
+    }
 }
