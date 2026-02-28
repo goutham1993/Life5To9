@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                // Hide FAB on Summary tab (position 2) and Calendar tab (position 3)
-                if (position == 2 || position == 3) { // Summary or Calendar tab
+                // Hide FAB on Summary (2), Calendar (3), and Insights (4) tabs
+                if (position == 2 || position == 3 || position == 4) {
                     fab.hide();
                 } else {
                     fab.show();
@@ -104,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 3:
                     tab.setText("Calendar");
+                    break;
+                case 4:
+                    tab.setText("Insights");
                     break;
             }
         }).attach();
@@ -127,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 3: // Calendar tab
                         // Calendar tab doesn't need FAB functionality
+                        break;
+                    case 4: // Insights tab
+                        // Insights tab doesn't need FAB functionality
                         break;
                 }
             }

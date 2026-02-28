@@ -34,7 +34,7 @@
             app:tabSelectedTextColor="@color/on_primary"
             app:tabIndicatorColor="@color/accent"
             app:tabIndicatorHeight="3dp"
-            app:tabMode="fixed"
+            app:tabMode="scrollable"
             app:tabGravity="fill" />
 
     </com.google.android.material.appbar.AppBarLayout>
