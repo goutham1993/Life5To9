@@ -224,10 +224,14 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             
             // Set category color
             try {
-                int color = Color.parseColor(item.getCategoryColor());
+                String catColor = item.getCategoryColor();
+                if (catColor == null || catColor.isEmpty()) {
+                    catColor = "#FF2E7D32";
+                }
+                int color = Color.parseColor(catColor);
                 viewCategoryColor.setBackgroundColor(color);
                 progressBarCategory.setProgressTintList(android.content.res.ColorStateList.valueOf(color));
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 // Use default color if parsing fails
                 viewCategoryColor.setBackgroundColor(Color.parseColor("#FF2E7D32"));
                 progressBarCategory.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF2E7D32")));

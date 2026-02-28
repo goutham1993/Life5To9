@@ -26,6 +26,7 @@ import com.journal.life5to9.data.entity.Category;
 import com.journal.life5to9.utils.ExportImportHelper;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -114,8 +115,7 @@ public class ExportImportActivity extends AppCompatActivity {
                     if (data != null) {
                         Uri uri = data.getData();
                         if (uri != null) {
-                            editTextExportPath.setText(uri.getPath());
-                            exportPath = uri.getPath();
+                            performImport(uri);
                         }
                     }
                 }
@@ -232,7 +232,50 @@ public class ExportImportActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/json", "text/csv", "text/plain"});
         filePickerLauncher.launch(intent);
     }
-    
+
+    private void performImport(Uri uri) {
+        // Determine format from the URI path or MIME type
+        String uriString = uri.toString().toLowerCase();
+        String mimeType = getContentResolver().getType(uri);
+        
+        final boolean isJson;
+        if (uriString.endsWith(".json") || (mimeType != null && mimeType.contains("json"))) {
+            isJson = true;
+        } else if (uriString.endsWith(".csv") || (mimeType != null && (mimeType.contains("csv") || mimeType.contains("comma")))) {
+            isJson = false;
+        } else {
+            // Default to JSON if format can't be determined
+            isJson = true;
+        }
+        
+        new Thread(() -> {
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                if (inputStream == null) {
+                    runOnUiThread(() -> Toast.makeText(this, "Could not open selected file", Toast.LENGTH_LONG).show());
+                    return;
+                }
+                
+                boolean success;
+                if (isJson) {
+                    success = exportImportHelper.importFromJson(inputStream);
+                } else {
+                    success = exportImportHelper.importFromCsv(inputStream);
+                }
+                
+                runOnUiThread(() -> {
+                    if (success) {
+                        Toast.makeText(this, "Data imported successfully!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "Import failed. Please check the file format.", Toast.LENGTH_LONG).show();
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Import failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
     private void checkPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {

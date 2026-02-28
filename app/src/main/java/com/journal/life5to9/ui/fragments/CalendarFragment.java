@@ -306,7 +306,10 @@ public class CalendarFragment extends Fragment {
                         if (indicatorCount >= 4) break; // Limit to 4 indicators
                         
                         long categoryId = entry.getKey();
-                        String categoryColor = categoryColors.getOrDefault(categoryId, "#FF2E7D32");
+                        String categoryColor = categoryColors.get(categoryId);
+                        if (categoryColor == null || categoryColor.isEmpty()) {
+                            categoryColor = "#FF2E7D32";
+                        }
                         
                         // Create colored dot indicator
                         View indicator = new View(getContext());
@@ -614,7 +617,10 @@ public class CalendarFragment extends Fragment {
             if (indicatorCount >= 6) break;
             
             long categoryId = entry.getKey();
-            String categoryColor = categoryColors.getOrDefault(categoryId, "#FF2E7D32");
+            String categoryColor = categoryColors.get(categoryId);
+            if (categoryColor == null || categoryColor.isEmpty()) {
+                categoryColor = "#FF2E7D32";
+            }
             
             // Create colored dot indicator
             View indicator = new View(getContext());
@@ -761,7 +767,11 @@ public class CalendarFragment extends Fragment {
             android.graphics.drawable.GradientDrawable colorDrawable = new android.graphics.drawable.GradientDrawable();
             colorDrawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
             try {
-                colorDrawable.setColor(Color.parseColor(category.getColor()));
+                String catColor = category.getColor();
+                if (catColor == null || catColor.isEmpty()) {
+                    catColor = "#FF2E7D32";
+                }
+                colorDrawable.setColor(Color.parseColor(catColor));
             } catch (IllegalArgumentException e) {
                 colorDrawable.setColor(Color.parseColor("#FF2E7D32"));
             }
