@@ -6,8 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -179,7 +180,7 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         private TextView textViewCategoryName;
         private TextView textViewTimeSpent;
         private TextView textViewDaysAndPercentage;
-        private ProgressBar progressBarCategory;
+        private LinearProgressIndicator progressBarCategory;
         private ImageView imageViewExpand;
         private LinearLayout layoutActivitiesContainer;
         

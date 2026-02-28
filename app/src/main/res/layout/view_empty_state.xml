@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutEmptyState"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/space_xl"
+    android:visibility="gone">
+
+    <!-- Icon -->
+    <ImageView
+        android:id="@+id/imageViewEmptyIcon"
+        android:layout_width="@dimen/icon_size_lg"
+        android:layout_height="@dimen/icon_size_lg"
+        android:src="@android:drawable/ic_menu_agenda"
+        android:importantForAccessibility="no"
+        app:tint="?attr/colorOutline" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/textViewEmptyTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md"
+        android:text="No entries yet"
+        android:textAppearance="@style/TextAppearance.Life.H3"
+        android:textAlignment="center" />
+
+    <!-- Body -->
+    <TextView
+        android:id="@+id/textViewEmptyBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:text="Tap the + button to add your first activity"
+        android:textAppearance="@style/TextAppearance.Life.Body"
+        android:textAlignment="center" />
+
+    <!-- Primary CTA -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonEmptyPrimary"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_lg"
+        android:text="Add Activity"
+        android:visibility="gone" />
+
+    <!-- Secondary CTA -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonEmptySecondary"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:text="Learn More"
+        android:visibility="gone" />
+
+</LinearLayout>

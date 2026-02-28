@@ -28,6 +28,7 @@ public class CategoriesFragment extends Fragment {
     private MainViewModel viewModel;
     private RecyclerView recyclerViewCategories;
     private TextView textViewEmpty;
+    private View emptyStateLayout;
     private CategoryAdapter adapter;
     
     @Override
@@ -43,6 +44,15 @@ public class CategoriesFragment extends Fragment {
         
         recyclerViewCategories = view.findViewById(R.id.recyclerViewCategories);
         textViewEmpty = view.findViewById(R.id.textViewEmpty);
+        emptyStateLayout = view.findViewById(R.id.emptyState);
+        
+        // Set empty state text
+        if (emptyStateLayout != null) {
+            TextView emptyTitle = emptyStateLayout.findViewById(R.id.textViewEmptyTitle);
+            TextView emptyBody = emptyStateLayout.findViewById(R.id.textViewEmptyBody);
+            if (emptyTitle != null) emptyTitle.setText("No categories");
+            if (emptyBody != null) emptyBody.setText("Tap + to create your first category");
+        }
         
         setupRecyclerView();
         observeData();
@@ -75,9 +85,11 @@ public class CategoriesFragment extends Fragment {
             if (categories != null && !categories.isEmpty()) {
                 adapter.setCategories(categories);
                 textViewEmpty.setVisibility(View.GONE);
+                if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
                 recyclerViewCategories.setVisibility(View.VISIBLE);
             } else {
-                textViewEmpty.setVisibility(View.VISIBLE);
+                textViewEmpty.setVisibility(View.GONE);
+                if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.VISIBLE);
                 recyclerViewCategories.setVisibility(View.GONE);
             }
         });

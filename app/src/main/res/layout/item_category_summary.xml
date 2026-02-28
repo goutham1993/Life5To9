@@ -4,83 +4,108 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp">
+    android:minHeight="@dimen/list_row_height"
+    android:paddingHorizontal="@dimen/screen_padding"
+    android:paddingVertical="@dimen/space_sm">
 
+    <!-- Category color dot -->
     <View
         android:id="@+id/viewCategoryColor"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:background="@drawable/circle_background"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/textViewCategoryName"
+        app:layout_constraintBottom_toBottomOf="@id/textViewCategoryName" />
 
+    <!-- Category name -->
     <TextView
         android:id="@+id/textViewCategoryName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/space_sm"
+        android:layout_marginEnd="@dimen/space_sm"
         android:text="Category Name"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="@color/on_surface"
-        app:layout_constraintEnd_toStartOf="@+id/textViewTimeSpent"
-        app:layout_constraintStart_toEndOf="@+id/viewCategoryColor"
-        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+        android:textAppearance="@style/TextAppearance.Life.Title"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintEnd_toStartOf="@id/textViewTimeSpent"
+        app:layout_constraintStart_toEndOf="@id/viewCategoryColor"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textViewDaysAndPercentage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:text="5.5h (+1.2h) • 12 days"
-        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-        android:textColor="@color/on_surface_variant"
-        app:layout_constraintStart_toEndOf="@+id/viewCategoryColor"
-        app:layout_constraintTop_toBottomOf="@+id/textViewCategoryName" />
-
+    <!-- Percentage (secondary, right aligned) -->
     <TextView
         android:id="@+id/textViewTimeSpent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="45%"
-        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-        android:textColor="@color/primary"
-        app:layout_constraintEnd_toStartOf="@+id/imageViewExpand"
-        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+        android:textAppearance="@style/TextAppearance.Life.Body"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintEnd_toStartOf="@id/imageViewExpand"
+        app:layout_constraintTop_toTopOf="@id/textViewCategoryName"
+        app:layout_constraintBottom_toBottomOf="@id/textViewCategoryName" />
 
+    <!-- Expand chevron -->
     <ImageView
         android:id="@+id/imageViewExpand"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/icon_size_sm"
+        android:layout_height="@dimen/icon_size_sm"
+        android:layout_marginStart="@dimen/space_xs"
         android:src="@drawable/ic_expand_more"
         android:contentDescription="Expand"
+        app:tint="?attr/colorOnSurfaceVariant"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/viewCategoryColor" />
+        app:layout_constraintTop_toTopOf="@id/textViewCategoryName"
+        app:layout_constraintBottom_toBottomOf="@id/textViewCategoryName" />
 
-    <ProgressBar
-        android:id="@+id/progressBarCategory"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- Hours and days subtitle -->
+    <TextView
+        android:id="@+id/textViewDaysAndPercentage"
         android:layout_width="0dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_sm"
+        android:layout_marginTop="2dp"
+        android:text="5.5h (+1.2h) - 12 days"
+        android:textAppearance="@style/TextAppearance.Life.Label"
+        app:layout_constraintEnd_toStartOf="@id/imageViewExpand"
+        app:layout_constraintStart_toEndOf="@id/viewCategoryColor"
+        app:layout_constraintTop_toBottomOf="@id/textViewCategoryName" />
+
+    <!-- Thin progress indicator -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressBarCategory"
+        style="@style/Widget.Life.ProgressIndicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
         android:max="100"
         android:progress="75"
-        android:progressTint="@color/primary"
+        app:trackThickness="@dimen/progress_height"
+        app:trackCornerRadius="3dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewDaysAndPercentage" />
+        app:layout_constraintTop_toBottomOf="@id/textViewDaysAndPercentage" />
 
+    <!-- Expandable activities container -->
     <LinearLayout
         android:id="@+id/layoutActivitiesContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/space_sm"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressBarCategory" />
+        app:layout_constraintTop_toBottomOf="@id/progressBarCategory" />
+
+    <!-- Divider -->
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        app:dividerColor="?attr/colorOutlineVariant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutActivitiesContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

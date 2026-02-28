@@ -39,7 +39,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_category, parent, false);
+                .inflate(R.layout.item_premium_list, parent, false);
         return new CategoryViewHolder(view);
     }
     
@@ -101,9 +101,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             textViewActivityCount.setText("0 activities");
             textViewTotalTime.setText("0.0 hours total");
             
-            // Show default badge if it's a default category
+            // Show default star indicator if it's a default category
             if (category.isDefault()) {
                 textViewIsDefault.setVisibility(View.VISIBLE);
+                textViewIsDefault.setText("\u2B50");
             } else {
                 textViewIsDefault.setVisibility(View.GONE);
             }

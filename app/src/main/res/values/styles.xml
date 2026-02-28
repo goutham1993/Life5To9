@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ========== Premium Card ========== -->
+    <style name="Widget.Life.Card.Premium" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
+        <item name="cardCornerRadius">@dimen/radius_card</item>
+        <item name="cardElevation">@dimen/elevation_none</item>
+        <item name="strokeWidth">@dimen/stroke_thin</item>
+        <item name="strokeColor">?attr/colorOutlineVariant</item>
+        <item name="contentPadding">@dimen/card_padding</item>
+    </style>
+
+    <!-- ========== Segmented Button (for MaterialButtonToggleGroup children) ========== -->
+    <style name="Widget.Life.SegmentedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/segmented_control_height</item>
+        <item name="cornerRadius">@dimen/radius_chip</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- ========== Bottom Sheet shape ========== -->
+    <style name="Widget.Life.BottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="shapeAppearance">@style/ShapeAppearance.Life.BottomSheet</item>
+    </style>
+
+    <style name="ShapeAppearance.Life.BottomSheet" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerSizeTopLeft">@dimen/radius_sheet</item>
+        <item name="cornerSizeTopRight">@dimen/radius_sheet</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ThemeOverlay.Life.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Life.BottomSheet</item>
+    </style>
+
+    <!-- ========== Chip Style (for quick-add) ========== -->
+    <style name="Widget.Life.Chip.QuickAdd" parent="Widget.Material3.Chip.Suggestion">
+        <item name="chipCornerRadius">@dimen/radius_chip</item>
+        <item name="chipMinHeight">40dp</item>
+        <item name="chipBackgroundColor">?attr/colorSurfaceContainerLow</item>
+        <item name="chipStrokeColor">?attr/colorOutlineVariant</item>
+        <item name="chipStrokeWidth">@dimen/stroke_thin</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!-- ========== Material Divider ========== -->
+    <style name="Widget.Life.Divider" parent="Widget.Material3.MaterialDivider">
+        <item name="dividerColor">?attr/colorOutlineVariant</item>
+        <item name="dividerThickness">1dp</item>
+    </style>
+
+    <!-- ========== Linear Progress Indicator ========== -->
+    <style name="Widget.Life.ProgressIndicator" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="trackThickness">@dimen/progress_height</item>
+        <item name="trackCornerRadius">3dp</item>
+    </style>
+
+</resources>

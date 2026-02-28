@@ -4,172 +4,165 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="?android:attr/colorBackground"
     tools:context=".ui.fragments.ActivityFragment">
 
-    <!-- View Selector Tabs -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardViewSelector"
+    <!-- Segmented Control: Daily / Weekly -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleGroupViewMode"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
+        android:layout_marginHorizontal="@dimen/screen_padding"
+        android:layout_marginTop="@dimen/space_sm"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:checkedButton="@id/buttonDailyView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonDailyView"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/segmented_control_height"
+            android:layout_weight="1"
+            android:text="Daily"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_chip" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonDailyView"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_margin="8dp"
-                android:text="Daily"
-                android:textSize="16sp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonWeeklyView"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/segmented_control_height"
+            android:layout_weight="1"
+            android:text="Weekly"
+            android:textAllCaps="false"
+            app:cornerRadius="@dimen/radius_chip" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonWeeklyView"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_margin="8dp"
-                android:text="Weekly"
-                android:textSize="16sp" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Selected Date Header -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardSelectedDate"
+    <!-- Compact Date Header -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutDateHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
+        android:layout_marginHorizontal="@dimen/screen_padding"
+        android:layout_marginTop="@dimen/space_sm"
+        android:paddingVertical="@dimen/space_sm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardViewSelector">
+        app:layout_constraintTop_toBottomOf="@id/toggleGroupViewMode">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Previous Day Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPreviousDay"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Previous"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconSize="20dp"
+            app:iconTint="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Day label -->
+        <TextView
+            android:id="@+id/textViewSelectedDay"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="12dp"
-            android:gravity="center_vertical">
+            android:text="Monday"
+            android:textAppearance="@style/TextAppearance.Life.Label"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintBottom_toTopOf="@id/textViewSelectedDate"
+            app:layout_constraintEnd_toStartOf="@id/buttonNextDay"
+            app:layout_constraintStart_toEndOf="@id/buttonPreviousDay"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
 
-            <!-- Previous Day Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonPreviousDay"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="Previous Day"
-                app:icon="@android:drawable/ic_media_previous"
-                app:iconSize="24dp" />
+        <!-- Date display -->
+        <TextView
+            android:id="@+id/textViewSelectedDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Dec 15, 2024"
+            android:textAppearance="@style/TextAppearance.Life.Title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/buttonNextDay"
+            app:layout_constraintStart_toEndOf="@id/buttonPreviousDay"
+            app:layout_constraintTop_toBottomOf="@id/textViewSelectedDay" />
 
-            <!-- Center: Day and Date -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginHorizontal="16dp">
+        <!-- Next Day Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonNextDay"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Next"
+            app:icon="@drawable/ic_arrow_forward"
+            app:iconSize="20dp"
+            app:iconTint="?attr/colorOnSurface"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/buttonSelectDate"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/textViewSelectedDay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Monday"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                    android:textColor="@color/primary"
-                    android:layout_marginBottom="2dp" />
+        <!-- Calendar picker button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSelectDate"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Select Date"
+            app:icon="@android:drawable/ic_menu_my_calendar"
+            app:iconSize="20dp"
+            app:iconTint="?attr/colorOnSurfaceVariant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/textViewSelectedDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dec 15, 2024"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                    android:textColor="@color/on_surface" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </LinearLayout>
-
-            <!-- Next Day Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonNextDay"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="Next Day"
-                app:icon="@android:drawable/ic_media_next"
-                app:iconSize="24dp" />
-
-            <!-- Calendar Icon -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonSelectDate"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="Select Date"
-                app:icon="@android:drawable/ic_menu_my_calendar"
-                app:iconSize="28dp" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Recent Activities Quick Add Section (only visible in Daily view) -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardRecentActivities"
+    <!-- Quick Add Chip Row -->
+    <LinearLayout
+        android:id="@+id/layoutQuickAdd"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginTop="@dimen/space_sm"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/screen_padding"
         android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardSelectedDate">
+        app:layout_constraintTop_toBottomOf="@id/layoutDateHeader">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/textViewRecentActivitiesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Add"
+            android:textAppearance="@style/TextAppearance.Life.Label"
+            android:layout_marginBottom="@dimen/space_sm" />
+
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:scrollbars="none"
+            android:clipToPadding="false">
 
-            <TextView
-                android:id="@+id/textViewRecentActivitiesTitle"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupQuickAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quick Add"
-                android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                android:textColor="@color/on_surface"
-                android:layout_marginBottom="8dp" />
+                app:singleLine="true"
+                app:chipSpacingHorizontal="@dimen/space_sm" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewRecentActivities"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp"
-                tools:listitem="@layout/item_recent_activity_quick_add" />
+        </HorizontalScrollView>
 
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
     <!-- Activities List -->
     <androidx.recyclerview.widget.RecyclerView
@@ -177,25 +170,23 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:paddingTop="@dimen/space_sm"
+        android:paddingBottom="@dimen/space_xl"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardRecentActivities"
+        app:layout_constraintTop_toBottomOf="@id/layoutQuickAdd"
         tools:listitem="@layout/item_activity" />
 
-    <TextView
-        android:id="@+id/textViewEmpty"
-        android:layout_width="wrap_content"
+    <!-- Empty State -->
+    <include
+        android:id="@+id/emptyState"
+        layout="@layout/view_empty_state"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="No activities recorded for this date.\nTap the + button to add your first activity!"
-        android:textAlignment="center"
-        android:textColor="@color/on_surface_variant"
-        android:textSize="16sp"
-        android:visibility="gone"
+        android:layout_marginTop="@dimen/space_xl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardRecentActivities" />
+        app:layout_constraintTop_toBottomOf="@id/layoutQuickAdd" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

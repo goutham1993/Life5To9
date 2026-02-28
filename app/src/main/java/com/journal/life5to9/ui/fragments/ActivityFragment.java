@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,13 +17,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.journal.life5to9.R;
 import com.journal.life5to9.data.entity.Activity;
 import com.journal.life5to9.data.entity.Category;
 import com.journal.life5to9.ui.adapters.ActivityAdapter;
 import com.journal.life5to9.ui.adapters.DayActivitiesAdapter;
-import com.journal.life5to9.ui.adapters.RecentActivityQuickAddAdapter;
 import com.journal.life5to9.ui.dialogs.EditActivityDialog;
+import com.journal.life5to9.utils.CategoryEmojiMapper;
 import com.journal.life5to9.viewmodel.MainViewModel;
 
 import java.text.SimpleDateFormat;
@@ -35,10 +39,10 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ActivityFragment extends Fragment {
-    
+
     private MainViewModel viewModel;
     private RecyclerView recyclerViewActivities;
-    private TextView textViewEmpty;
+    private View emptyStateLayout;
     private TextView textViewSelectedDate;
     private TextView textViewSelectedDay;
     private MaterialButton buttonSelectDate;
@@ -46,27 +50,27 @@ public class ActivityFragment extends Fragment {
     private MaterialButton buttonNextDay;
     private MaterialButton buttonDailyView;
     private MaterialButton buttonWeeklyView;
+    private MaterialButtonToggleGroup toggleGroupViewMode;
     private ActivityAdapter adapter;
     private DayActivitiesAdapter dayAdapter;
-    private RecentActivityQuickAddAdapter recentActivityAdapter;
-    private RecyclerView recyclerViewRecentActivities;
-    private com.google.android.material.card.MaterialCardView cardRecentActivities;
+    private LinearLayout layoutQuickAdd;
+    private ChipGroup chipGroupQuickAdd;
     private List<Category> categories;
-    
+
     private Date selectedDate;
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat dayFormat;
-    
+
     // View mode constants
     private static final int VIEW_DAILY = 0;
     private static final int VIEW_WEEKLY = 1;
     private int currentViewMode = VIEW_DAILY;
-    
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        
+
         // Initialize selected date to today (normalized to start of day)
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -77,23 +81,23 @@ public class ActivityFragment extends Fragment {
         dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
         dayFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
     }
-    
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_activity, container, false);
-        
+
         initializeViews(view);
         setupRecyclerView();
         setupClickListeners();
         observeData();
-        
+
         return view;
     }
-    
+
     private void initializeViews(View view) {
         recyclerViewActivities = view.findViewById(R.id.recyclerViewActivities);
-        textViewEmpty = view.findViewById(R.id.textViewEmpty);
+        emptyStateLayout = view.findViewById(R.id.emptyState);
         textViewSelectedDate = view.findViewById(R.id.textViewSelectedDate);
         textViewSelectedDay = view.findViewById(R.id.textViewSelectedDay);
         buttonSelectDate = view.findViewById(R.id.buttonSelectDate);
@@ -101,14 +105,22 @@ public class ActivityFragment extends Fragment {
         buttonNextDay = view.findViewById(R.id.buttonNextDay);
         buttonDailyView = view.findViewById(R.id.buttonDailyView);
         buttonWeeklyView = view.findViewById(R.id.buttonWeeklyView);
-        recyclerViewRecentActivities = view.findViewById(R.id.recyclerViewRecentActivities);
-        cardRecentActivities = view.findViewById(R.id.cardRecentActivities);
-        
+        toggleGroupViewMode = view.findViewById(R.id.toggleGroupViewMode);
+        layoutQuickAdd = view.findViewById(R.id.layoutQuickAdd);
+        chipGroupQuickAdd = view.findViewById(R.id.chipGroupQuickAdd);
+
+        // Set empty state text
+        if (emptyStateLayout != null) {
+            TextView emptyTitle = emptyStateLayout.findViewById(R.id.textViewEmptyTitle);
+            TextView emptyBody = emptyStateLayout.findViewById(R.id.textViewEmptyBody);
+            if (emptyTitle != null) emptyTitle.setText("No activities yet");
+            if (emptyBody != null) emptyBody.setText("Tap the + button to log your first activity");
+        }
+
         // Set initial date display
         updateSelectedDateDisplay();
-        updateViewSelector();
     }
-    
+
     private void setupRecyclerView() {
         adapter = new ActivityAdapter();
         adapter.setOnActivityClickListener(new ActivityAdapter.OnActivityClickListener() {
@@ -116,58 +128,48 @@ public class ActivityFragment extends Fragment {
             public void onActivityClick(Activity activity) {
                 showEditActivityDialog(activity);
             }
-            
+
             @Override
             public void onActivityLongClick(Activity activity) {
-                // This is now handled by the delete listener
+                // Handled by delete listener
             }
         });
-        
+
         adapter.setOnActivityDeleteListener(activity -> {
             showDeleteConfirmationDialog(activity);
         });
-        
+
         // Initialize day adapter for weekly view
         dayAdapter = new DayActivitiesAdapter(getContext());
-        
-        // Initialize recent activities adapter
-        recentActivityAdapter = new RecentActivityQuickAddAdapter();
-        recentActivityAdapter.setOnRecentActivityClickListener(activity -> {
-            quickAddActivity(activity);
-        });
-        
-        // Setup recent activities RecyclerView (horizontal)
-        recyclerViewRecentActivities.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        recyclerViewRecentActivities.setAdapter(recentActivityAdapter);
-        
+
         recyclerViewActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewActivities.setAdapter(adapter);
-        
+
         // Load categories for the adapters
         loadCategories();
     }
-    
-    
+
     private void setupClickListeners() {
         buttonSelectDate.setOnClickListener(v -> showDatePickerDialog());
         buttonPreviousDay.setOnClickListener(v -> goToPreviousDay());
         buttonNextDay.setOnClickListener(v -> goToNextDay());
-        
-        // View selector buttons
-        buttonDailyView.setOnClickListener(v -> {
-            android.util.Log.d("ActivityFragment", "Daily button clicked");
-            setViewMode(VIEW_DAILY);
-        });
-        buttonWeeklyView.setOnClickListener(v -> {
-            android.util.Log.d("ActivityFragment", "Weekly button clicked");
-            setViewMode(VIEW_WEEKLY);
+
+        // MaterialButtonToggleGroup handles selection state automatically
+        toggleGroupViewMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                if (checkedId == R.id.buttonDailyView) {
+                    setViewMode(VIEW_DAILY);
+                } else if (checkedId == R.id.buttonWeeklyView) {
+                    setViewMode(VIEW_WEEKLY);
+                }
+            }
         });
     }
-    
+
     private void showDatePickerDialog() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(selectedDate);
-        
+
         DatePickerDialog datePickerDialog = new DatePickerDialog(
             requireContext(),
             (view, year, month, dayOfMonth) -> {
@@ -186,13 +188,12 @@ public class ActivityFragment extends Fragment {
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         );
-        
+
         datePickerDialog.show();
     }
-    
+
     private void updateSelectedDateDisplay() {
         if (currentViewMode == VIEW_WEEKLY) {
-            // Show week range for weekly view
             String weekRange = formatWeekRange(selectedDate);
             if (textViewSelectedDate != null) {
                 textViewSelectedDate.setText(weekRange);
@@ -201,7 +202,6 @@ public class ActivityFragment extends Fragment {
                 textViewSelectedDay.setText("Week");
             }
         } else {
-            // Show individual date for daily view
             if (textViewSelectedDate != null) {
                 textViewSelectedDate.setText(dateFormat.format(selectedDate));
             }
@@ -209,13 +209,9 @@ public class ActivityFragment extends Fragment {
                 textViewSelectedDay.setText(dayFormat.format(selectedDate));
             }
         }
-        android.util.Log.d("ActivityFragment", "Selected date updated to: " + selectedDate);
-        android.util.Log.d("ActivityFragment", "View mode: " + currentViewMode);
     }
-    
+
     private void loadActivitiesForSelectedDate() {
-        android.util.Log.d("ActivityFragment", "Loading activities for date: " + selectedDate);
-        
         // Calculate start and end of day
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(selectedDate);
@@ -224,7 +220,7 @@ public class ActivityFragment extends Fragment {
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MILLISECOND, 0);
         Date startOfDay = startCal.getTime();
-        
+
         Calendar endCal = Calendar.getInstance();
         endCal.setTime(selectedDate);
         endCal.set(Calendar.HOUR_OF_DAY, 23);
@@ -232,124 +228,143 @@ public class ActivityFragment extends Fragment {
         endCal.set(Calendar.SECOND, 59);
         endCal.set(Calendar.MILLISECOND, 999);
         Date endOfDay = endCal.getTime();
-        
-        android.util.Log.d("ActivityFragment", "Querying activities from " + startOfDay + " to " + endOfDay);
-        android.util.Log.d("ActivityFragment", "Start timestamp: " + startOfDay.getTime() + ", End timestamp: " + endOfDay.getTime());
-        
+
         viewModel.getActivitiesByDate(startOfDay, endOfDay).observe(getViewLifecycleOwner(), activities -> {
-            android.util.Log.d("ActivityFragment", "Received activities: " + (activities != null ? activities.size() : 0));
             if (activities != null && !activities.isEmpty()) {
                 adapter.setActivities(activities);
-                textViewEmpty.setVisibility(View.GONE);
-                recyclerViewActivities.setVisibility(View.VISIBLE);
+                showContent();
             } else {
-                textViewEmpty.setVisibility(View.VISIBLE);
-                recyclerViewActivities.setVisibility(View.GONE);
+                showEmpty();
             }
         });
     }
-    
+
+    private void showContent() {
+        if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.GONE);
+        recyclerViewActivities.setVisibility(View.VISIBLE);
+    }
+
+    private void showEmpty() {
+        if (emptyStateLayout != null) emptyStateLayout.setVisibility(View.VISIBLE);
+        recyclerViewActivities.setVisibility(View.GONE);
+    }
+
     private void observeData() {
-        // Load activities for the initially selected view mode
         loadActivitiesForCurrentView();
-        // Load recent activities for quick add
         loadRecentActivities();
     }
-    
+
     private void loadCategories() {
         viewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
             if (categories != null && adapter != null) {
                 this.categories = categories;
                 adapter.setCategories(categories);
-                if (recentActivityAdapter != null) {
-                    recentActivityAdapter.setCategories(categories);
-                }
             }
         });
     }
-    
+
     private void quickAddActivity(Activity activity) {
-        // Create a new activity with the same category, notes, and time spent
-        // but with the current selected date and time
         Calendar cal = Calendar.getInstance();
         cal.setTime(selectedDate);
-        
-        // Use current time for the activity
+
         Calendar now = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
         cal.set(Calendar.MINUTE, now.get(Calendar.MINUTE));
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        
+
         Date activityDate = cal.getTime();
-        
-        // Add the activity
+
         viewModel.addActivity(
             activity.getCategoryId(),
             activity.getNotes(),
             activity.getTimeSpentHours(),
             activityDate
         );
-        
-        // Show success message
-        Toast.makeText(getContext(), "Activity added successfully!", Toast.LENGTH_SHORT).show();
-        
-        // Refresh the activities list
+
+        Toast.makeText(getContext(), "Activity added!", Toast.LENGTH_SHORT).show();
         loadActivitiesForSelectedDate();
     }
-    
+
     private void loadRecentActivities() {
         viewModel.getRecentActivities(5).observe(getViewLifecycleOwner(), activities -> {
-            if (activities != null && !activities.isEmpty() && recentActivityAdapter != null) {
-                recentActivityAdapter.setActivities(activities);
+            if (activities != null && !activities.isEmpty() && chipGroupQuickAdd != null) {
+                populateQuickAddChips(activities);
                 if (currentViewMode == VIEW_DAILY) {
-                    cardRecentActivities.setVisibility(View.VISIBLE);
+                    layoutQuickAdd.setVisibility(View.VISIBLE);
                 }
             } else {
-                if (currentViewMode == VIEW_DAILY && (activities == null || activities.isEmpty())) {
-                    cardRecentActivities.setVisibility(View.GONE);
+                if (layoutQuickAdd != null) {
+                    layoutQuickAdd.setVisibility(View.GONE);
                 }
             }
         });
     }
-    
+
+    private void populateQuickAddChips(List<Activity> activities) {
+        chipGroupQuickAdd.removeAllViews();
+
+        Map<Long, Category> categoryMap = new HashMap<>();
+        if (categories != null) {
+            for (Category cat : categories) {
+                categoryMap.put(cat.getId(), cat);
+            }
+        }
+
+        for (Activity activity : activities) {
+            Chip chip = new Chip(requireContext());
+            chip.setChipBackgroundColorResource(R.color.surfaceContainerLow);
+            chip.setChipStrokeColorResource(R.color.outlineVariant);
+            chip.setChipStrokeWidth(getResources().getDimension(R.dimen.stroke_thin));
+            chip.setChipCornerRadius(getResources().getDimension(R.dimen.radius_chip));
+            chip.setEnsureMinTouchTargetSize(false);
+
+            Category cat = categoryMap.get(activity.getCategoryId());
+            String categoryName = cat != null ? cat.getName() : "Activity";
+            String emoji = CategoryEmojiMapper.getEmojiForCategory(categoryName);
+            String notes = activity.getNotes() != null && !activity.getNotes().isEmpty()
+                    ? activity.getNotes() : categoryName;
+            String label = emoji + " " + notes + " (" + String.format(Locale.getDefault(), "%.1fh", activity.getTimeSpentHours()) + ")";
+            chip.setText(label);
+            chip.setOnClickListener(v -> quickAddActivity(activity));
+            chipGroupQuickAdd.addView(chip);
+        }
+    }
+
     private void showEditActivityDialog(Activity activity) {
         EditActivityDialog dialog = EditActivityDialog.newInstance(activity);
-        
+
         dialog.setCategories(categories);
         dialog.setOnActivityUpdatedListener(updatedActivity -> {
             viewModel.updateActivity(updatedActivity);
-            // Refresh the activities list
             loadActivitiesForSelectedDate();
         });
-        
+
         dialog.show(getParentFragmentManager(), "EditActivityDialog");
     }
-    
+
     private void showDeleteConfirmationDialog(Activity activity) {
         new androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Delete Activity")
             .setMessage("Are you sure you want to delete this activity? This action cannot be undone.")
             .setPositiveButton("Delete", (dialog, which) -> {
                 viewModel.deleteActivity(activity);
-                // Refresh the activities list
                 loadActivitiesForSelectedDate();
             })
             .setNegativeButton("Cancel", null)
             .show();
     }
-    
+
     private void goToPreviousDay() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(selectedDate);
-        
+
         if (currentViewMode == VIEW_DAILY) {
             cal.add(Calendar.DAY_OF_MONTH, -1);
         } else if (currentViewMode == VIEW_WEEKLY) {
             cal.add(Calendar.WEEK_OF_YEAR, -1);
         }
-        
-        // Normalize to start of day
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -358,18 +373,17 @@ public class ActivityFragment extends Fragment {
         updateSelectedDateDisplay();
         loadActivitiesForCurrentView();
     }
-    
+
     private void goToNextDay() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(selectedDate);
-        
+
         if (currentViewMode == VIEW_DAILY) {
             cal.add(Calendar.DAY_OF_MONTH, 1);
         } else if (currentViewMode == VIEW_WEEKLY) {
             cal.add(Calendar.WEEK_OF_YEAR, 1);
         }
-        
-        // Normalize to start of day
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -378,99 +392,31 @@ public class ActivityFragment extends Fragment {
         updateSelectedDateDisplay();
         loadActivitiesForCurrentView();
     }
-    
-    // Method to get the currently selected date (for use by MainActivity)
+
     public Date getSelectedDate() {
         return selectedDate;
     }
-    
-    // Method to refresh activities (for use by MainActivity)
+
     public void refreshActivities() {
         loadActivitiesForSelectedDate();
     }
-    
+
     private void setViewMode(int viewMode) {
-        android.util.Log.d("ActivityFragment", "setViewMode called with: " + viewMode);
         currentViewMode = viewMode;
-        updateViewSelector();
-        updateDateHeaderVisibility();
-        updateSelectedDateDisplay(); // Add this to update the display when switching views
-        
-        // Show/hide recent activities section based on view mode
+        updateSelectedDateDisplay();
+
+        // Show/hide quick add chips based on view mode
         if (viewMode == VIEW_DAILY) {
             loadRecentActivities();
         } else {
-            cardRecentActivities.setVisibility(View.GONE);
+            if (layoutQuickAdd != null) {
+                layoutQuickAdd.setVisibility(View.GONE);
+            }
         }
-        
+
         loadActivitiesForCurrentView();
     }
-    
-    private void updateViewSelector() {
-        // Reset all buttons to unselected state
-        buttonDailyView.setSelected(false);
-        buttonWeeklyView.setSelected(false);
-        
-        // Reset button colors to default Material3 OutlinedButton state
-        // Only reset tint and text color, keep the Material3 background
-        buttonDailyView.setBackgroundTintList(null);
-        buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
-        
-        buttonWeeklyView.setBackgroundTintList(null);
-        buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
-        
-        // Check if dark theme is enabled
-        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-        boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-        
-        // Set selected button with appropriate highlighting
-        switch (currentViewMode) {
-            case VIEW_DAILY:
-                buttonDailyView.setSelected(true);
-                buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
-                buttonDailyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
-                
-                // Set weekly button to unselected state with theme-aware background
-                buttonWeeklyView.setSelected(false);
-                if (isDarkTheme) {
-                    buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.surface_variant, null));
-                    buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.on_surface_variant, null));
-                } else {
-                    buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
-                    buttonWeeklyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
-                }
-                break;
-                
-            case VIEW_WEEKLY:
-                buttonWeeklyView.setSelected(true);
-                buttonWeeklyView.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
-                buttonWeeklyView.setTextColor(getResources().getColorStateList(android.R.color.white, null));
-                
-                // Set daily button to unselected state with theme-aware background
-                buttonDailyView.setSelected(false);
-                if (isDarkTheme) {
-                    buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.surface_variant, null));
-                    buttonDailyView.setTextColor(getResources().getColorStateList(R.color.on_surface_variant, null));
-                } else {
-                    buttonDailyView.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
-                    buttonDailyView.setTextColor(getResources().getColorStateList(R.color.primary, null));
-                }
-                break;
-        }
-    }
-    
-    private void updateDateHeaderVisibility() {
-        // Show date navigation for both Daily and Weekly views
-        textViewSelectedDate.setVisibility(View.VISIBLE);
-        textViewSelectedDay.setVisibility(View.VISIBLE);
-        buttonSelectDate.setVisibility(View.VISIBLE);
-        buttonPreviousDay.setVisibility(View.VISIBLE);
-        buttonNextDay.setVisibility(View.VISIBLE);
-        
-        // Show/hide recent activities section based on view mode
-        // The visibility is managed by loadRecentActivities() method
-    }
-    
+
     private void loadActivitiesForCurrentView() {
         switch (currentViewMode) {
             case VIEW_DAILY:
@@ -481,151 +427,110 @@ public class ActivityFragment extends Fragment {
                 break;
         }
     }
-    
+
     private void loadDailyActivities() {
-        // Switch back to regular adapter for daily view
         recyclerViewActivities.setAdapter(adapter);
-        // Load activities for the selected date (same as current implementation)
         loadActivitiesForSelectedDate();
-        // Load recent activities for quick add
         loadRecentActivities();
     }
-    
+
     private void loadWeeklyActivities() {
-        android.util.Log.d("ActivityFragment", "loadWeeklyActivities called");
-        android.util.Log.d("ActivityFragment", "Selected date: " + selectedDate);
-        
-        // Calculate week start and end dates
         Calendar cal = Calendar.getInstance();
         cal.setTime(selectedDate);
-        
-        // Get the day of week (1=Sunday, 2=Monday, etc.)
+
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-        
-        // Calculate days to subtract to get to Monday
-        // If it's Sunday (1), subtract 6 days to get to Monday
-        // If it's Monday (2), subtract 0 days
-        // If it's Tuesday (3), subtract 1 day, etc.
         int daysToSubtract = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
         cal.add(Calendar.DAY_OF_MONTH, -daysToSubtract);
-        
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date weekStart = cal.getTime();
-        
+
         cal.add(Calendar.DAY_OF_WEEK, 6);
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
         Date weekEnd = cal.getTime();
-        
-        android.util.Log.d("ActivityFragment", "Week range: " + weekStart + " to " + weekEnd);
-        
-        // Load activities for the week
+
         viewModel.getActivitiesByDate(weekStart, weekEnd).observe(getViewLifecycleOwner(), activities -> {
-            android.util.Log.d("ActivityFragment", "Weekly activities received: " + (activities != null ? activities.size() : 0));
             if (activities != null && !activities.isEmpty()) {
-                // Group activities by day
                 List<DayActivitiesAdapter.DayActivities> dayActivitiesList = groupActivitiesByDay(activities, weekStart);
-                
-                // Switch to day adapter for weekly view
+
                 recyclerViewActivities.setAdapter(dayAdapter);
                 dayAdapter.setDayActivities(dayActivitiesList);
                 dayAdapter.setCategories(categories);
-                
-                textViewEmpty.setVisibility(View.GONE);
-                recyclerViewActivities.setVisibility(View.VISIBLE);
+
+                showContent();
             } else {
-                textViewEmpty.setVisibility(View.VISIBLE);
-                recyclerViewActivities.setVisibility(View.GONE);
+                showEmpty();
             }
         });
     }
-    
-    
+
     private List<DayActivitiesAdapter.DayActivities> groupActivitiesByDay(List<Activity> activities, Date weekStart) {
         Map<String, List<Activity>> dayMap = new HashMap<>();
-        
-        // Initialize all days of the week
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(weekStart);
-        
+
         for (int i = 0; i < 7; i++) {
-            String dayKey = String.format("%04d-%02d-%02d", 
-                cal.get(Calendar.YEAR), 
-                cal.get(Calendar.MONTH) + 1, 
+            String dayKey = String.format("%04d-%02d-%02d",
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1,
                 cal.get(Calendar.DAY_OF_MONTH));
             dayMap.put(dayKey, new ArrayList<>());
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
-        
-        // Group activities by day
+
         for (Activity activity : activities) {
             Calendar activityCal = Calendar.getInstance();
             activityCal.setTime(activity.getDate());
-            String dayKey = String.format("%04d-%02d-%02d", 
-                activityCal.get(Calendar.YEAR), 
-                activityCal.get(Calendar.MONTH) + 1, 
+            String dayKey = String.format("%04d-%02d-%02d",
+                activityCal.get(Calendar.YEAR),
+                activityCal.get(Calendar.MONTH) + 1,
                 activityCal.get(Calendar.DAY_OF_MONTH));
-            
+
             if (dayMap.containsKey(dayKey)) {
                 dayMap.get(dayKey).add(activity);
             }
         }
-        
-        // Create DayActivities objects
+
         List<DayActivitiesAdapter.DayActivities> dayActivitiesList = new ArrayList<>();
         cal.setTime(weekStart);
-        
+
         for (int i = 0; i < 7; i++) {
-            String dayKey = String.format("%04d-%02d-%02d", 
-                cal.get(Calendar.YEAR), 
-                cal.get(Calendar.MONTH) + 1, 
+            String dayKey = String.format("%04d-%02d-%02d",
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1,
                 cal.get(Calendar.DAY_OF_MONTH));
-            
+
             List<Activity> dayActivities = dayMap.get(dayKey);
             if (dayActivities != null) {
                 dayActivitiesList.add(new DayActivitiesAdapter.DayActivities(cal.getTime(), dayActivities));
             }
-            
+
             cal.add(Calendar.DAY_OF_MONTH, 1);
         }
-        
+
         return dayActivitiesList;
     }
-    
+
     private String formatWeekRange(Date date) {
-        android.util.Log.d("ActivityFragment", "formatWeekRange called with date: " + date);
-        
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        
-        // Get the day of week (1=Sunday, 2=Monday, etc.)
+
         int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-        android.util.Log.d("ActivityFragment", "Day of week: " + dayOfWeek);
-        
-        // Calculate days to subtract to get to Monday
         int daysToSubtract = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
-        android.util.Log.d("ActivityFragment", "Days to subtract: " + daysToSubtract);
         cal.add(Calendar.DAY_OF_MONTH, -daysToSubtract);
-        
-        // Get Monday date
+
         Date monday = cal.getTime();
-        android.util.Log.d("ActivityFragment", "Monday date: " + monday);
-        
-        // Get Sunday date (6 days later)
         cal.add(Calendar.DAY_OF_MONTH, 6);
         Date sunday = cal.getTime();
-        android.util.Log.d("ActivityFragment", "Sunday date: " + sunday);
-        
-        // Format the range
+
         SimpleDateFormat dayFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
-        String weekRange = dayFormat.format(monday) + " - " + dayFormat.format(sunday);
-        android.util.Log.d("ActivityFragment", "Formatted week range: " + weekRange);
-        
-        return weekRange;
+        return dayFormat.format(monday) + " - " + dayFormat.format(sunday);
     }
 }

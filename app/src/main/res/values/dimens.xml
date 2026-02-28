@@ -1,3 +1,35 @@
 <resources>
+    <!-- FAB -->
     <dimen name="fab_margin">16dp</dimen>
+
+    <!-- Spacing tokens -->
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_sm">8dp</dimen>
+    <dimen name="space_md">16dp</dimen>
+    <dimen name="space_lg">24dp</dimen>
+    <dimen name="space_xl">32dp</dimen>
+
+    <!-- Screen / card padding -->
+    <dimen name="screen_padding">16dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+
+    <!-- Shape radii -->
+    <dimen name="radius_chip">12dp</dimen>
+    <dimen name="radius_card">16dp</dimen>
+    <dimen name="radius_sheet">24dp</dimen>
+
+    <!-- Component heights -->
+    <dimen name="segmented_control_height">40dp</dimen>
+    <dimen name="progress_height">6dp</dimen>
+    <dimen name="list_row_height">64dp</dimen>
+    <dimen name="icon_size_sm">24dp</dimen>
+    <dimen name="icon_size_md">36dp</dimen>
+    <dimen name="icon_size_lg">48dp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="elevation_none">0dp</dimen>
+    <dimen name="elevation_low">1dp</dimen>
+
+    <!-- Stroke -->
+    <dimen name="stroke_thin">1dp</dimen>
 </resources>

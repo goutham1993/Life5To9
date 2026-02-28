@@ -1,36 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Dark theme colors -->
-    
-    <!-- Primary Colors (same as light theme) -->
-    <color name="primary">#FF2E7D32</color>
-    <color name="primary_dark">#FF1B5E20</color>
-    <color name="primary_light">#FF4CAF50</color>
-    <color name="accent">#FFFF9800</color>
-    
-    <!-- Dark Background Colors -->
-    <color name="background">#FF121212</color>
-    <color name="surface">#FF1E1E1E</color>
-    <color name="surface_variant">#FF2C2C2C</color>
-    
+
+    <!-- Primary Colors (brand green, lighter for dark) -->
+    <color name="primary">#FF81C784</color>
+    <color name="primary_dark">#FF2E7D32</color>
+    <color name="primary_light">#FFA5D6A7</color>
+    <color name="primaryContainer">#FF1B5E20</color>
+    <color name="onPrimaryContainer">#FFB8F0B8</color>
+
+    <!-- Secondary Colors (muted green) -->
+    <color name="secondary">#FFBBCFBD</color>
+    <color name="onSecondary">#FF263A2A</color>
+    <color name="secondaryContainer">#FF3C5140</color>
+    <color name="onSecondaryContainer">#FFD7E8D9</color>
+
+    <!-- Tertiary -->
+    <color name="tertiary">#FFA0CFCF</color>
+    <color name="onTertiary">#FF003737</color>
+    <color name="tertiaryContainer">#FF1E4E4E</color>
+    <color name="onTertiaryContainer">#FFBBEBEB</color>
+
+    <!-- Dark Background / Surface Colors -->
+    <color name="background">#FF121412</color>
+    <color name="surface">#FF121412</color>
+    <color name="surface_variant">#FF43483F</color>
+    <color name="surfaceContainerLowest">#FF0D0F0D</color>
+    <color name="surfaceContainerLow">#FF1A1C19</color>
+    <color name="surfaceContainer">#FF1E201D</color>
+    <color name="surfaceContainerHigh">#FF282B27</color>
+    <color name="surfaceContainerHighest">#FF333532</color>
+
     <!-- Dark Text Colors -->
-    <color name="on_primary">#FFFFFFFF</color>
-    <color name="on_surface">#FFFFFFFF</color>
-    <color name="on_surface_variant">#FFB3B3B3</color>
-    <color name="on_background">#FFFFFFFF</color>
-    
+    <color name="on_primary">#FF003910</color>
+    <color name="on_surface">#FFE2E4E0</color>
+    <color name="on_surface_variant">#FFC3C8BC</color>
+    <color name="on_background">#FFE2E4E0</color>
+
+    <!-- Outline -->
+    <color name="outline">#FF8D9387</color>
+    <color name="outlineVariant">#FF43483F</color>
+
     <!-- Category Colors (same as light theme) -->
-    <color name="fitness_color">#FF5722</color>
-    <color name="family_color">#E91E63</color>
-    <color name="learning_color">#9C27B0</color>
-    <color name="entertainment_color">#3F51B5</color>
-    <color name="chores_color">#FF9800</color>
-    <color name="social_color">#4CAF50</color>
-    <color name="rest_color">#607D8B</color>
-    
-    <!-- Status Colors (same as light theme) -->
-    <color name="success">#FF4CAF50</color>
-    <color name="warning">#FFFF9800</color>
-    <color name="error">#FFF44336</color>
-    <color name="info">#FF2196F3</color>
+    <color name="fitness_color">#FFFF8A65</color>
+    <color name="family_color">#FFF48FB1</color>
+    <color name="learning_color">#FFCE93D8</color>
+    <color name="entertainment_color">#FF9FA8DA</color>
+    <color name="chores_color">#FFFFCC80</color>
+    <color name="social_color">#FFA5D6A7</color>
+    <color name="rest_color">#FF90A4AE</color>
+
+    <!-- Status Colors -->
+    <color name="success">#FF81C784</color>
+    <color name="warning">#FFFFCC80</color>
+    <color name="error">#FFF2B8B5</color>
+    <color name="errorContainer">#FF8C1D18</color>
+    <color name="onError">#FF601410</color>
+    <color name="onErrorContainer">#FFF9DEDC</color>
+    <color name="info">#FF90CAF9</color>
+
+    <!-- Keep for backward compat but map to primary -->
+    <color name="accent">@color/secondary</color>
+    <color name="selected_date_orange">@color/primaryContainer</color>
 </resources>
