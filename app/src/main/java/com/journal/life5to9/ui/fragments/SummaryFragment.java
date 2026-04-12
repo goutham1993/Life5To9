@@ -874,9 +874,16 @@ public class SummaryFragment extends Fragment {
             android.util.Log.d("SummaryFragment", (i + 1) + ". " + item.getCategoryName() + ": " + item.getTimeSpent() + "h");
         }
         
-        Integer monthlyDayDenominator = (currentMonthlyTabMode == MONTHLY_TAB_ALL)
-                ? getMonthlyAllTabDayDenominator(currentMonthStart)
-                : null;
+        Integer monthlyDayDenominator;
+        if (currentMonthlyTabMode == MONTHLY_TAB_ALL) {
+            monthlyDayDenominator = getMonthlyAllTabDayDenominator(currentMonthStart);
+        } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKDAY) {
+            monthlyDayDenominator = getMonthlyWeekdayTabDayDenominator(currentMonthStart);
+        } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKEND) {
+            monthlyDayDenominator = getMonthlyWeekendTabDayDenominator(currentMonthStart);
+        } else {
+            monthlyDayDenominator = null;
+        }
         monthlyAdapter.setSummaryItems(summaryItems, monthlyDayDenominator);
         
         // Set dynamic height for monthly RecyclerView based on number of categories
@@ -1031,10 +1038,10 @@ public class SummaryFragment extends Fragment {
     }
     
     /**
-     * Denominator for "active days / …" in the monthly All tab: days elapsed in the month (inclusive of today)
-     * when viewing the current month; otherwise the number of days in that calendar month.
+     * Last calendar day (1-based) to include when building monthly denominators: through today for the
+     * current month, otherwise the full length of that month.
      */
-    private int getMonthlyAllTabDayDenominator(Date monthStart) {
+    private int getInclusiveEndDayOfMonthForMonthlyDenominator(Date monthStart) {
         Calendar monthCal = Calendar.getInstance();
         monthCal.setTime(monthStart);
         Calendar now = Calendar.getInstance();
@@ -1046,6 +1053,47 @@ public class SummaryFragment extends Fragment {
             return now.get(Calendar.DAY_OF_MONTH);
         }
         return monthCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+    
+    /** All tab: calendar days from the 1st through the inclusive end day. */
+    private int getMonthlyAllTabDayDenominator(Date monthStart) {
+        return getInclusiveEndDayOfMonthForMonthlyDenominator(monthStart);
+    }
+    
+    /** Weekday tab: Mon–Fri days from the 1st through the inclusive end day. */
+    private int getMonthlyWeekdayTabDayDenominator(Date monthStart) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(monthStart);
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int endDay = getInclusiveEndDayOfMonthForMonthlyDenominator(monthStart);
+        int count = 0;
+        for (int day = 1; day <= endDay; day++) {
+            c.set(year, month, day);
+            int dow = c.get(Calendar.DAY_OF_WEEK);
+            if (dow >= Calendar.MONDAY && dow <= Calendar.FRIDAY) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /** Weekend tab: Sat–Sun days from the 1st through the inclusive end day. */
+    private int getMonthlyWeekendTabDayDenominator(Date monthStart) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(monthStart);
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int endDay = getInclusiveEndDayOfMonthForMonthlyDenominator(monthStart);
+        int count = 0;
+        for (int day = 1; day <= endDay; day++) {
+            c.set(year, month, day);
+            int dow = c.get(Calendar.DAY_OF_WEEK);
+            if (dow == Calendar.SATURDAY || dow == Calendar.SUNDAY) {
+                count++;
+            }
+        }
+        return count;
     }
     
     private String formatWeekdayRange(Date weekdayStart) {
