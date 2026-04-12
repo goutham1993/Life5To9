@@ -33,56 +33,49 @@ public class SummaryFragment extends Fragment {
     
     private MainViewModel viewModel;
     private TextView textViewWeeklyTotal;
-    private TextView textViewWeekendTotal;
     private TextView textViewMonthlyTotal;
     private TextView textViewWeeklyPeriod;
-    private TextView textViewWeekendPeriod;
     private TextView textViewMonthlyPeriod;
     private RecyclerView recyclerViewWeeklyCategoryBreakdown;
-    private RecyclerView recyclerViewWeekendCategoryBreakdown;
     private RecyclerView recyclerViewMonthlyCategoryBreakdown;
     private CategorySummaryAdapter weeklyAdapter;
-    private CategorySummaryAdapter weekendAdapter;
     private CategorySummaryAdapter monthlyAdapter;
     private List<Category> categories;
     
     // Dropdown functionality
     private com.google.android.material.button.MaterialButton buttonWeeklyDropdown;
-    private com.google.android.material.button.MaterialButton buttonWeekendDropdown;
     private com.google.android.material.button.MaterialButton buttonMonthlyDropdown;
     private android.widget.LinearLayout layoutWeeklyBreakdown;
-    private android.widget.LinearLayout layoutWeekendBreakdown;
     private android.widget.LinearLayout layoutMonthlyBreakdown;
     private boolean isWeeklyExpanded = false;
-    private boolean isWeekendExpanded = false;
     private boolean isMonthlyExpanded = false;
     
-    // Monthly tab mode constants
-    private static final int MONTHLY_TAB_WEEKDAY = 0;
-    private static final int MONTHLY_TAB_WEEKEND = 1;
-    private static final int MONTHLY_TAB_ALL = 2;
-    private int currentMonthlyTabMode = MONTHLY_TAB_ALL;
+    /** Shared All / Weekday / Weekend tab values (weekly + monthly breakdown). */
+    private static final int TAB_WEEKDAY = 0;
+    private static final int TAB_WEEKEND = 1;
+    private static final int TAB_ALL = 2;
+    private int currentWeeklyTabMode = TAB_ALL;
+    private int currentMonthlyTabMode = TAB_ALL;
     
-    // Store current monthly activities for tab filtering
+    private List<Activity> currentWeeklyActivities = new ArrayList<>();
     private List<Activity> currentMonthlyActivities = new ArrayList<>();
     
     // Navigation functionality
     private com.google.android.material.button.MaterialButton buttonWeeklyPrevious;
     private com.google.android.material.button.MaterialButton buttonWeeklyNext;
-    private com.google.android.material.button.MaterialButton buttonWeekendPrevious;
-    private com.google.android.material.button.MaterialButton buttonWeekendNext;
     private com.google.android.material.button.MaterialButton buttonMonthlyPrevious;
     private com.google.android.material.button.MaterialButton buttonMonthlyNext;
     private com.google.android.material.button.MaterialButton buttonMonthlyWeekday;
     private com.google.android.material.button.MaterialButton buttonMonthlyWeekend;
     private com.google.android.material.button.MaterialButton buttonMonthlyAll;
+    private com.google.android.material.button.MaterialButton buttonWeeklyWeekday;
+    private com.google.android.material.button.MaterialButton buttonWeeklyWeekend;
+    private com.google.android.material.button.MaterialButton buttonWeeklyAll;
     
-    // Current navigation state
-    private Date currentWeekdayStart;
-    private Date currentWeekendStart;
+    /** Monday 00:00 of the week shown in the weekly card. */
+    private Date currentWeekStart;
     private Date currentMonthStart;
     private Date originalWeekStart;
-    private Date originalWeekendStart;
     private Date originalMonthStart;
     
     // Date formatters
@@ -109,33 +102,27 @@ public class SummaryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_summary, container, false);
         
         textViewWeeklyTotal = view.findViewById(R.id.textViewWeeklyTotal);
-        textViewWeekendTotal = view.findViewById(R.id.textViewWeekendTotal);
         textViewMonthlyTotal = view.findViewById(R.id.textViewMonthlyTotal);
         textViewWeeklyPeriod = view.findViewById(R.id.textViewWeeklyPeriod);
-        textViewWeekendPeriod = view.findViewById(R.id.textViewWeekendPeriod);
         textViewMonthlyPeriod = view.findViewById(R.id.textViewMonthlyPeriod);
         recyclerViewWeeklyCategoryBreakdown = view.findViewById(R.id.recyclerViewWeeklyCategoryBreakdown);
-        recyclerViewWeekendCategoryBreakdown = view.findViewById(R.id.recyclerViewWeekendCategoryBreakdown);
         recyclerViewMonthlyCategoryBreakdown = view.findViewById(R.id.recyclerViewMonthlyCategoryBreakdown);
         
-        // Initialize dropdown elements
         buttonWeeklyDropdown = view.findViewById(R.id.buttonWeeklyDropdown);
-        buttonWeekendDropdown = view.findViewById(R.id.buttonWeekendDropdown);
         buttonMonthlyDropdown = view.findViewById(R.id.buttonMonthlyDropdown);
         layoutWeeklyBreakdown = view.findViewById(R.id.layoutWeeklyBreakdown);
-        layoutWeekendBreakdown = view.findViewById(R.id.layoutWeekendBreakdown);
         layoutMonthlyBreakdown = view.findViewById(R.id.layoutMonthlyBreakdown);
         
-        // Initialize navigation elements
         buttonWeeklyPrevious = view.findViewById(R.id.buttonWeeklyPrevious);
         buttonWeeklyNext = view.findViewById(R.id.buttonWeeklyNext);
-        buttonWeekendPrevious = view.findViewById(R.id.buttonWeekendPrevious);
-        buttonWeekendNext = view.findViewById(R.id.buttonWeekendNext);
         buttonMonthlyPrevious = view.findViewById(R.id.buttonMonthlyPrevious);
         buttonMonthlyNext = view.findViewById(R.id.buttonMonthlyNext);
         buttonMonthlyWeekday = view.findViewById(R.id.buttonMonthlyWeekday);
         buttonMonthlyWeekend = view.findViewById(R.id.buttonMonthlyWeekend);
         buttonMonthlyAll = view.findViewById(R.id.buttonMonthlyAll);
+        buttonWeeklyAll = view.findViewById(R.id.buttonWeeklyAll);
+        buttonWeeklyWeekday = view.findViewById(R.id.buttonWeeklyWeekday);
+        buttonWeeklyWeekend = view.findViewById(R.id.buttonWeeklyWeekend);
         
         setupRecyclerView();
         setupCardBackgrounds(view);
@@ -160,14 +147,10 @@ public class SummaryFragment extends Fragment {
         
         // Find all MaterialCardView elements and set their background color
         com.google.android.material.card.MaterialCardView weeklyCard = view.findViewById(R.id.cardWeekly);
-        com.google.android.material.card.MaterialCardView weekendCard = view.findViewById(R.id.cardWeekend);
         com.google.android.material.card.MaterialCardView monthlyCard = view.findViewById(R.id.cardMonthly);
         
         if (weeklyCard != null) {
             weeklyCard.setCardBackgroundColor(backgroundColor);
-        }
-        if (weekendCard != null) {
-            weekendCard.setCardBackgroundColor(backgroundColor);
         }
         if (monthlyCard != null) {
             monthlyCard.setCardBackgroundColor(backgroundColor);
@@ -175,15 +158,9 @@ public class SummaryFragment extends Fragment {
     }
     
     private void setupRecyclerView() {
-        // Setup weekly breakdown
         weeklyAdapter = new CategorySummaryAdapter();
         recyclerViewWeeklyCategoryBreakdown.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewWeeklyCategoryBreakdown.setAdapter(weeklyAdapter);
-        
-        // Setup weekend breakdown
-        weekendAdapter = new CategorySummaryAdapter();
-        recyclerViewWeekendCategoryBreakdown.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerViewWeekendCategoryBreakdown.setAdapter(weekendAdapter);
         
         // Setup monthly breakdown
         monthlyAdapter = new CategorySummaryAdapter();
@@ -193,20 +170,20 @@ public class SummaryFragment extends Fragment {
     
     private void setupDropdownListeners() {
         buttonWeeklyDropdown.setOnClickListener(v -> toggleWeeklyBreakdown());
-        buttonWeekendDropdown.setOnClickListener(v -> toggleWeekendBreakdown());
         buttonMonthlyDropdown.setOnClickListener(v -> toggleMonthlyBreakdown());
         
-        // Monthly tab listeners
-        buttonMonthlyWeekday.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_WEEKDAY));
-        buttonMonthlyWeekend.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_WEEKEND));
-        buttonMonthlyAll.setOnClickListener(v -> setMonthlyTabMode(MONTHLY_TAB_ALL));
+        buttonWeeklyWeekday.setOnClickListener(v -> setWeeklyTabMode(TAB_WEEKDAY));
+        buttonWeeklyWeekend.setOnClickListener(v -> setWeeklyTabMode(TAB_WEEKEND));
+        buttonWeeklyAll.setOnClickListener(v -> setWeeklyTabMode(TAB_ALL));
+        
+        buttonMonthlyWeekday.setOnClickListener(v -> setMonthlyTabMode(TAB_WEEKDAY));
+        buttonMonthlyWeekend.setOnClickListener(v -> setMonthlyTabMode(TAB_WEEKEND));
+        buttonMonthlyAll.setOnClickListener(v -> setMonthlyTabMode(TAB_ALL));
     }
     
     private void setupNavigationListeners() {
         buttonWeeklyPrevious.setOnClickListener(v -> navigateToPreviousWeek());
         buttonWeeklyNext.setOnClickListener(v -> navigateToNextWeek());
-        buttonWeekendPrevious.setOnClickListener(v -> navigateToPreviousWeekend());
-        buttonWeekendNext.setOnClickListener(v -> navigateToNextWeekend());
         buttonMonthlyPrevious.setOnClickListener(v -> navigateToPreviousMonth());
         buttonMonthlyNext.setOnClickListener(v -> navigateToNextMonth());
     }
@@ -217,23 +194,11 @@ public class SummaryFragment extends Fragment {
             layoutWeeklyBreakdown.setVisibility(android.view.View.VISIBLE);
             buttonWeeklyDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_close_clear_cancel));
             buttonWeeklyDropdown.setIconSize(32);
+            updateWeeklyTabSelector();
         } else {
             layoutWeeklyBreakdown.setVisibility(android.view.View.GONE);
             buttonWeeklyDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_more));
             buttonWeeklyDropdown.setIconSize(32);
-        }
-    }
-    
-    private void toggleWeekendBreakdown() {
-        isWeekendExpanded = !isWeekendExpanded;
-        if (isWeekendExpanded) {
-            layoutWeekendBreakdown.setVisibility(android.view.View.VISIBLE);
-            buttonWeekendDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_close_clear_cancel));
-            buttonWeekendDropdown.setIconSize(32);
-        } else {
-            layoutWeekendBreakdown.setVisibility(android.view.View.GONE);
-            buttonWeekendDropdown.setIcon(getResources().getDrawable(android.R.drawable.ic_menu_more));
-            buttonWeekendDropdown.setIconSize(32);
         }
     }
     
@@ -280,7 +245,7 @@ public class SummaryFragment extends Fragment {
         
         // Set selected button with orange highlighting and unselected buttons with theme-aware background
         switch (currentMonthlyTabMode) {
-            case MONTHLY_TAB_WEEKDAY:
+            case TAB_WEEKDAY:
                 buttonMonthlyWeekday.setSelected(true);
                 buttonMonthlyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyWeekday.setTextColor(getResources().getColorStateList(android.R.color.white, null));
@@ -305,7 +270,7 @@ public class SummaryFragment extends Fragment {
                 }
                 break;
                 
-            case MONTHLY_TAB_WEEKEND:
+            case TAB_WEEKEND:
                 buttonMonthlyWeekend.setSelected(true);
                 buttonMonthlyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyWeekend.setTextColor(getResources().getColorStateList(android.R.color.white, null));
@@ -330,7 +295,7 @@ public class SummaryFragment extends Fragment {
                 }
                 break;
                 
-            case MONTHLY_TAB_ALL:
+            case TAB_ALL:
                 buttonMonthlyAll.setSelected(true);
                 buttonMonthlyAll.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
                 buttonMonthlyAll.setTextColor(getResources().getColorStateList(android.R.color.white, null));
@@ -357,12 +322,72 @@ public class SummaryFragment extends Fragment {
         }
     }
     
+    private void setWeeklyTabMode(int tabMode) {
+        currentWeeklyTabMode = tabMode;
+        updateWeeklyTabSelector();
+        if (currentWeeklyActivities != null && !currentWeeklyActivities.isEmpty()) {
+            List<Activity> filtered = filterActivitiesByTab(currentWeeklyActivities, currentWeeklyTabMode);
+            textViewWeeklyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", calculateTotalTime(filtered)));
+            updateWeeklyCategoryBreakdown(currentWeeklyActivities);
+        }
+        updatePeriodLabels();
+    }
+    
+    private void updateWeeklyTabSelector() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        
+        buttonWeeklyWeekday.setSelected(false);
+        buttonWeeklyWeekend.setSelected(false);
+        buttonWeeklyAll.setSelected(false);
+        
+        buttonWeeklyWeekday.setBackgroundTintList(null);
+        buttonWeeklyWeekday.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        buttonWeeklyWeekend.setBackgroundTintList(null);
+        buttonWeeklyWeekend.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        buttonWeeklyAll.setBackgroundTintList(null);
+        buttonWeeklyAll.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        
+        switch (currentWeeklyTabMode) {
+            case TAB_WEEKDAY:
+                buttonWeeklyWeekday.setSelected(true);
+                buttonWeeklyWeekday.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonWeeklyWeekday.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                styleWeeklyTabUnselected(buttonWeeklyWeekend, isDarkTheme);
+                styleWeeklyTabUnselected(buttonWeeklyAll, isDarkTheme);
+                break;
+            case TAB_WEEKEND:
+                buttonWeeklyWeekend.setSelected(true);
+                buttonWeeklyWeekend.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonWeeklyWeekend.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                styleWeeklyTabUnselected(buttonWeeklyWeekday, isDarkTheme);
+                styleWeeklyTabUnselected(buttonWeeklyAll, isDarkTheme);
+                break;
+            case TAB_ALL:
+                buttonWeeklyAll.setSelected(true);
+                buttonWeeklyAll.setBackgroundTintList(getResources().getColorStateList(R.color.selected_date_orange, null));
+                buttonWeeklyAll.setTextColor(getResources().getColorStateList(android.R.color.white, null));
+                styleWeeklyTabUnselected(buttonWeeklyWeekday, isDarkTheme);
+                styleWeeklyTabUnselected(buttonWeeklyWeekend, isDarkTheme);
+                break;
+        }
+    }
+    
+    private void styleWeeklyTabUnselected(com.google.android.material.button.MaterialButton button, boolean isDarkTheme) {
+        button.setSelected(false);
+        if (isDarkTheme) {
+            button.setBackgroundTintList(getResources().getColorStateList(R.color.surface_variant, null));
+            button.setTextColor(getResources().getColorStateList(R.color.on_surface_variant, null));
+        } else {
+            button.setBackgroundTintList(getResources().getColorStateList(R.color.white, null));
+            button.setTextColor(getResources().getColorStateList(R.color.primary, null));
+        }
+    }
+    
     private void observeData() {
-        // Get current week and month dates
         Calendar calendar = Calendar.getInstance();
         Date now = calendar.getTime();
         
-        // Get start of current weekday period (Monday)
         calendar.setTime(now);
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
@@ -371,37 +396,8 @@ public class SummaryFragment extends Fragment {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        Date weekdayStart = calendar.getTime();
+        Date mondayStart = calendar.getTime();
         
-        // Calculate weekday end (Friday end of day)
-        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        Date weekdayEnd = calendar.getTime();
-        
-        // Get start of current weekend (Saturday)
-        calendar.setTime(now);
-        int dayOfWeekForWeekend = calendar.get(Calendar.DAY_OF_WEEK);
-        // Calculate days to subtract to get to Saturday
-        int daysFromSaturday;
-        if (dayOfWeekForWeekend == Calendar.SATURDAY) {
-            daysFromSaturday = 0; // Already Saturday
-        } else if (dayOfWeekForWeekend == Calendar.SUNDAY) {
-            daysFromSaturday = 1; // Go back 1 day to Saturday
-        } else {
-            // For Monday (2) to Friday (6), calculate days to previous Saturday
-            daysFromSaturday = dayOfWeekForWeekend - Calendar.SATURDAY;
-        }
-        calendar.add(Calendar.DAY_OF_MONTH, -daysFromSaturday);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        Date weekendStart = calendar.getTime();
-        
-        // Get start of month
         calendar.setTime(now);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -410,24 +406,11 @@ public class SummaryFragment extends Fragment {
         calendar.set(Calendar.MILLISECOND, 0);
         Date monthStart = calendar.getTime();
         
-        // Debug: Log the weekday calculation
-        android.util.Log.d("SummaryFragment", "Weekday start: " + weekdayStart);
-        android.util.Log.d("SummaryFragment", "Weekend start: " + weekendStart);
-        android.util.Log.d("SummaryFragment", "Current date: " + now);
-        android.util.Log.d("SummaryFragment", "Day of week: " + dayOfWeekForWeekend + " (1=Sunday, 7=Saturday)");
-        android.util.Log.d("SummaryFragment", "Days from Saturday: " + daysFromSaturday);
+        android.util.Log.d("SummaryFragment", "Week start (Monday): " + mondayStart);
         
-        // Store dates for later use
-        this.weekStart = weekdayStart;
-        this.weekendStart = weekendStart;
-        this.monthStart = monthStart;
-        
-        // Initialize current navigation state
-        this.currentWeekdayStart = weekdayStart;
-        this.currentWeekendStart = weekendStart;
+        this.currentWeekStart = mondayStart;
         this.currentMonthStart = monthStart;
-        this.originalWeekStart = weekdayStart;
-        this.originalWeekendStart = weekendStart;
+        this.originalWeekStart = mondayStart;
         this.originalMonthStart = monthStart;
         
         // Observe categories first, then activities
@@ -445,37 +428,15 @@ public class SummaryFragment extends Fragment {
         });
     }
     
-    private Date weekStart;
-    private Date weekendStart;
-    private Date monthStart;
-    
     private void observeActivities() {
-        // Calculate weekday end date
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekdayStart);
-        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        Date weekdayEnd = calendar.getTime();
-        
-        // Observe weekday activities (Monday-Friday)
-        viewModel.getActivitiesForWeekdays(currentWeekdayStart, weekdayEnd).observe(getViewLifecycleOwner(), activities -> {
-            double weekdayTotal = calculateTotalTime(activities);
-            android.util.Log.d("SummaryFragment", "Weekday activities count: " + (activities != null ? activities.size() : 0));
-            android.util.Log.d("SummaryFragment", "Weekday total: " + weekdayTotal + " hours");
-            textViewWeeklyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", weekdayTotal));
-            updateWeeklyCategoryBreakdown(activities);
-        });
-        
-        // Observe weekend activities
-        viewModel.getActivitiesForWeekend(currentWeekendStart).observe(getViewLifecycleOwner(), activities -> {
-            double weekendTotal = calculateTotalTime(activities);
-            android.util.Log.d("SummaryFragment", "Weekend activities count: " + (activities != null ? activities.size() : 0));
-            android.util.Log.d("SummaryFragment", "Weekend total: " + weekendTotal + " hours");
-            textViewWeekendTotal.setText(String.format(Locale.getDefault(), "%.1f hours", weekendTotal));
-            updateWeekendCategoryBreakdown(activities);
+        viewModel.getActivitiesForWeek(currentWeekStart).observe(getViewLifecycleOwner(), activities -> {
+            currentWeeklyActivities = activities != null ? activities : new ArrayList<>();
+            List<Activity> filtered = filterActivitiesByTab(currentWeeklyActivities, currentWeeklyTabMode);
+            double weeklyTotal = calculateTotalTime(filtered);
+            android.util.Log.d("SummaryFragment", "Week activities count: " + currentWeeklyActivities.size() + ", filtered: " + filtered.size());
+            android.util.Log.d("SummaryFragment", "Weekly total (tab): " + weeklyTotal + " hours");
+            textViewWeeklyTotal.setText(String.format(Locale.getDefault(), "%.1f hours", weeklyTotal));
+            updateWeeklyCategoryBreakdown(currentWeeklyActivities);
         });
         
         // Observe monthly activities
@@ -510,28 +471,20 @@ public class SummaryFragment extends Fragment {
             return;
         }
         
-        // Only show if expanded
         if (isWeeklyExpanded) {
             layoutWeeklyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
-        // Calculate previous weekday dates for comparison
+        List<Activity> filteredCurrent = filterActivitiesByTab(activities, currentWeeklyTabMode);
+        
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekdayStart);
+        calendar.setTime(currentWeekStart);
         calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        Date previousWeekdayStart = calendar.getTime();
+        Date previousWeekStart = calendar.getTime();
         
-        // Calculate previous weekday end date
-        calendar.add(Calendar.DAY_OF_MONTH, 4); // Add 4 days to get to Friday
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        Date previousWeekdayEnd = calendar.getTime();
-        
-        // Load previous weekday data for comparison
-        viewModel.getActivitiesForWeekdays(previousWeekdayStart, previousWeekdayEnd).observe(getViewLifecycleOwner(), previousActivities -> {
-            updateWeeklyCategoryBreakdownWithComparison(activities, previousActivities);
+        viewModel.getActivitiesForPreviousWeek(previousWeekStart, currentWeekStart).observe(getViewLifecycleOwner(), previousActivities -> {
+            List<Activity> filteredPrevious = filterActivitiesByTab(previousActivities, currentWeeklyTabMode);
+            updateWeeklyCategoryBreakdownWithComparison(filteredCurrent, filteredPrevious);
         });
     }
     
@@ -622,116 +575,6 @@ public class SummaryFragment extends Fragment {
         weeklyAdapter.setSummaryItems(summaryItems, null);
     }
     
-    private void updateWeekendCategoryBreakdown(List<Activity> activities) {
-        if (activities == null || activities.isEmpty()) {
-            layoutWeekendBreakdown.setVisibility(android.view.View.GONE);
-            return;
-        }
-        
-        // Only show if expanded
-        if (isWeekendExpanded) {
-            layoutWeekendBreakdown.setVisibility(android.view.View.VISIBLE);
-        }
-        
-        // Calculate previous weekend dates for comparison
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekendStart);
-        calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        Date previousWeekendStart = calendar.getTime();
-        
-        // Load previous weekend data for comparison
-        viewModel.getActivitiesForPreviousWeekend(previousWeekendStart, currentWeekendStart).observe(getViewLifecycleOwner(), previousActivities -> {
-            updateWeekendCategoryBreakdownWithComparison(activities, previousActivities);
-        });
-    }
-    
-    private void updateWeekendCategoryBreakdownWithComparison(List<Activity> activities, List<Activity> previousActivities) {
-        // Group activities by category
-        Map<Long, List<Activity>> categoryActivitiesMap = new HashMap<>();
-        Map<Long, Double> categoryTimeMap = new HashMap<>();
-        for (Activity activity : activities) {
-            long categoryId = activity.getCategoryId();
-            double timeSpent = activity.getTimeSpentHours();
-            android.util.Log.d("SummaryFragment", "Weekend Activity: ID=" + activity.getId() + ", CategoryID=" + categoryId + ", Time=" + timeSpent + "h, Notes=" + activity.getNotes());
-            
-            // Add to activities list for this category
-            if (!categoryActivitiesMap.containsKey(categoryId)) {
-                categoryActivitiesMap.put(categoryId, new ArrayList<>());
-            }
-            categoryActivitiesMap.get(categoryId).add(activity);
-            
-            // Add to time total
-            categoryTimeMap.put(categoryId, categoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
-        }
-        
-        // Group previous weekend activities by category for comparison
-        Map<Long, Double> previousCategoryTimeMap = new HashMap<>();
-        if (previousActivities != null) {
-            for (Activity activity : previousActivities) {
-                long categoryId = activity.getCategoryId();
-                double timeSpent = activity.getTimeSpentHours();
-                previousCategoryTimeMap.put(categoryId, previousCategoryTimeMap.getOrDefault(categoryId, 0.0) + timeSpent);
-            }
-        }
-        
-        // Create summary items
-        List<CategorySummaryAdapter.CategorySummaryItem> summaryItems = new ArrayList<>();
-        double totalTime = calculateTotalTime(activities);
-        
-        for (Map.Entry<Long, Double> entry : categoryTimeMap.entrySet()) {
-            long categoryId = entry.getKey();
-            double timeSpent = entry.getValue();
-            List<Activity> categoryActivities = categoryActivitiesMap.get(categoryId);
-            
-            android.util.Log.d("SummaryFragment", "Looking up category ID: " + categoryId + " with time: " + timeSpent);
-            
-            // Look up actual category name and color
-            String categoryName = "Unknown Category";
-            String categoryColor = "#FF2E7D32"; // Default primary color
-            
-            if (categories != null) {
-                android.util.Log.d("SummaryFragment", "Categories list size: " + categories.size());
-                boolean found = false;
-                for (Category category : categories) {
-                    android.util.Log.d("SummaryFragment", "Checking category: ID=" + category.getId() + ", Name=" + category.getName());
-                    if (category.getId() == categoryId) {
-                        // Get emoji for the category
-                        String emoji = CategoryEmojiMapper.getEmojiForCategory(category.getName());
-                        categoryName = emoji + " " + category.getName();
-                        categoryColor = category.getColor();
-                        android.util.Log.d("SummaryFragment", "Weekend Category FOUND: " + category.getName() + " -> Emoji: " + emoji);
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    android.util.Log.w("SummaryFragment", "Category ID " + categoryId + " NOT FOUND in categories list!");
-                }
-            } else {
-                android.util.Log.w("SummaryFragment", "Categories list is null!");
-            }
-            
-            // Get previous weekend time for this category
-            double previousTimeSpent = previousCategoryTimeMap.getOrDefault(categoryId, 0.0);
-            
-            summaryItems.add(new CategorySummaryAdapter.CategorySummaryItem(
-                categoryName, categoryColor, timeSpent, totalTime, categoryActivities, previousTimeSpent
-            ));
-        }
-        
-        // Sort by time spent (highest first)
-        summaryItems.sort((a, b) -> Double.compare(b.getTimeSpent(), a.getTimeSpent()));
-        
-        // Debug: Log sorted order
-        android.util.Log.d("SummaryFragment", "Weekend breakdown sorted order:");
-        for (int i = 0; i < summaryItems.size(); i++) {
-            CategorySummaryAdapter.CategorySummaryItem item = summaryItems.get(i);
-            android.util.Log.d("SummaryFragment", (i + 1) + ". " + item.getCategoryName() + ": " + item.getTimeSpent() + "h");
-        }
-        
-        weekendAdapter.setSummaryItems(summaryItems, null);
-    }
-    
     private void updateMonthlyCategoryBreakdown(List<Activity> activities) {
         if (activities == null || activities.isEmpty()) {
             layoutMonthlyBreakdown.setVisibility(android.view.View.GONE);
@@ -743,27 +586,23 @@ public class SummaryFragment extends Fragment {
             layoutMonthlyBreakdown.setVisibility(android.view.View.VISIBLE);
         }
         
-        // Filter activities based on selected tab
-        List<Activity> filteredActivities = filterActivitiesByTab(activities);
+        List<Activity> filteredActivities = filterActivitiesByTab(activities, currentMonthlyTabMode);
         
-        // Calculate previous month dates for comparison
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(currentMonthStart);
         calendar.add(Calendar.MONTH, -1);
         Date previousMonthStart = calendar.getTime();
         
-        // Load previous month data for comparison
         viewModel.getActivitiesForPreviousMonth(previousMonthStart, currentMonthStart).observe(getViewLifecycleOwner(), previousActivities -> {
-            List<Activity> filteredPreviousActivities = filterActivitiesByTab(previousActivities);
+            List<Activity> filteredPreviousActivities = filterActivitiesByTab(previousActivities, currentMonthlyTabMode);
             updateMonthlyCategoryBreakdownWithComparison(filteredActivities, filteredPreviousActivities);
         });
     }
     
-    private List<Activity> filterActivitiesByTab(List<Activity> activities) {
+    private List<Activity> filterActivitiesByTab(List<Activity> activities, int tabMode) {
         if (activities == null) return new ArrayList<>();
         
-        // If "All" tab is selected, return all activities without filtering
-        if (currentMonthlyTabMode == MONTHLY_TAB_ALL) {
+        if (tabMode == TAB_ALL) {
             return new ArrayList<>(activities);
         }
         
@@ -774,13 +613,11 @@ public class SummaryFragment extends Fragment {
             calendar.setTime(activity.getDate());
             int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
             
-            if (currentMonthlyTabMode == MONTHLY_TAB_WEEKDAY) {
-                // Monday (2) to Friday (6)
+            if (tabMode == TAB_WEEKDAY) {
                 if (dayOfWeek >= Calendar.MONDAY && dayOfWeek <= Calendar.FRIDAY) {
                     filteredActivities.add(activity);
                 }
-            } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKEND) {
-                // Saturday (7) and Sunday (1)
+            } else if (tabMode == TAB_WEEKEND) {
                 if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
                     filteredActivities.add(activity);
                 }
@@ -875,11 +712,11 @@ public class SummaryFragment extends Fragment {
         }
         
         Integer monthlyDayDenominator;
-        if (currentMonthlyTabMode == MONTHLY_TAB_ALL) {
+        if (currentMonthlyTabMode == TAB_ALL) {
             monthlyDayDenominator = getMonthlyAllTabDayDenominator(currentMonthStart);
-        } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKDAY) {
+        } else if (currentMonthlyTabMode == TAB_WEEKDAY) {
             monthlyDayDenominator = getMonthlyWeekdayTabDayDenominator(currentMonthStart);
-        } else if (currentMonthlyTabMode == MONTHLY_TAB_WEEKEND) {
+        } else if (currentMonthlyTabMode == TAB_WEEKEND) {
             monthlyDayDenominator = getMonthlyWeekendTabDayDenominator(currentMonthStart);
         } else {
             monthlyDayDenominator = null;
@@ -917,41 +754,17 @@ public class SummaryFragment extends Fragment {
     // Navigation methods
     private void navigateToPreviousWeek() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekdayStart);
+        calendar.setTime(currentWeekStart);
         calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        currentWeekdayStart = calendar.getTime();
-        
-        // Re-observe activities with new date
+        currentWeekStart = calendar.getTime();
         observeActivities();
     }
     
     private void navigateToNextWeek() {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekdayStart);
+        calendar.setTime(currentWeekStart);
         calendar.add(Calendar.WEEK_OF_YEAR, 1);
-        currentWeekdayStart = calendar.getTime();
-        
-        // Re-observe activities with new date
-        observeActivities();
-    }
-    
-    private void navigateToPreviousWeekend() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekendStart);
-        calendar.add(Calendar.WEEK_OF_YEAR, -1);
-        currentWeekendStart = calendar.getTime();
-        
-        // Re-observe activities with new date
-        observeActivities();
-    }
-    
-    private void navigateToNextWeekend() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentWeekendStart);
-        calendar.add(Calendar.WEEK_OF_YEAR, 1);
-        currentWeekendStart = calendar.getTime();
-        
-        // Re-observe activities with new date
+        currentWeekStart = calendar.getTime();
         observeActivities();
     }
     
@@ -976,20 +789,13 @@ public class SummaryFragment extends Fragment {
     }
     
     private void updatePeriodLabels() {
-        // Update weekday period label
-        if (isCurrentWeek()) {
-            textViewWeeklyPeriod.setText("This Weekday");
+        boolean currentWeek = isCurrentWeek();
+        if (currentWeeklyTabMode == TAB_ALL) {
+            textViewWeeklyPeriod.setText(currentWeek ? "This Week" : formatWeekRange(currentWeekStart));
+        } else if (currentWeeklyTabMode == TAB_WEEKDAY) {
+            textViewWeeklyPeriod.setText(currentWeek ? "This Weekday" : formatWeekdayRange(currentWeekStart));
         } else {
-            String weekdayLabel = formatWeekdayRange(currentWeekdayStart);
-            textViewWeeklyPeriod.setText(weekdayLabel);
-        }
-        
-        // Update weekend period label
-        if (isCurrentWeekend()) {
-            textViewWeekendPeriod.setText("This Weekend");
-        } else {
-            String weekendLabel = formatWeekendRange(currentWeekendStart);
-            textViewWeekendPeriod.setText(weekendLabel);
+            textViewWeeklyPeriod.setText(currentWeek ? "This Weekend" : formatWeekendRangeFromMonday(currentWeekStart));
         }
         
         // Update monthly period label
@@ -1004,28 +810,10 @@ public class SummaryFragment extends Fragment {
     private boolean isCurrentWeek() {
         Calendar current = Calendar.getInstance();
         Calendar week = Calendar.getInstance();
-        week.setTime(currentWeekdayStart);
+        week.setTime(currentWeekStart);
         
         return current.get(Calendar.YEAR) == week.get(Calendar.YEAR) &&
                current.get(Calendar.WEEK_OF_YEAR) == week.get(Calendar.WEEK_OF_YEAR);
-    }
-    
-    private boolean isCurrentWeekend() {
-        Calendar current = Calendar.getInstance();
-        Calendar weekend = Calendar.getInstance();
-        weekend.setTime(currentWeekendStart);
-        
-        // Check if current date is in the same weekend (Saturday-Sunday)
-        int currentDayOfWeek = current.get(Calendar.DAY_OF_WEEK);
-        int weekendDayOfWeek = weekend.get(Calendar.DAY_OF_WEEK);
-        
-        // Weekend is Saturday (7) to Sunday (1)
-        boolean isCurrentWeekend = (currentDayOfWeek == Calendar.SATURDAY || currentDayOfWeek == Calendar.SUNDAY) &&
-                                 (weekendDayOfWeek == Calendar.SATURDAY) &&
-                                 current.get(Calendar.YEAR) == weekend.get(Calendar.YEAR) &&
-                                 current.get(Calendar.WEEK_OF_YEAR) == weekend.get(Calendar.WEEK_OF_YEAR);
-        
-        return isCurrentWeekend;
     }
     
     private boolean isCurrentMonth() {
@@ -1128,18 +916,15 @@ public class SummaryFragment extends Fragment {
         return weekFormatter.format(start) + " - " + weekFormatter.format(end);
     }
     
-    private String formatWeekendRange(Date weekendStart) {
+    /** Sat–Sun of the week that starts on Monday {@code monday}. */
+    private String formatWeekendRangeFromMonday(Date monday) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(weekendStart);
-        
-        // Weekend starts on Saturday
-        Date start = calendar.getTime();
-        
-        // Weekend ends on Sunday (next day)
+        calendar.setTime(monday);
+        calendar.add(Calendar.DAY_OF_MONTH, 5);
+        Date saturday = calendar.getTime();
         calendar.add(Calendar.DAY_OF_MONTH, 1);
-        Date end = calendar.getTime();
-        
-        return weekendFormatter.format(start) + " - " + weekendFormatter.format(end);
+        Date sunday = calendar.getTime();
+        return weekendFormatter.format(saturday) + " - " + weekendFormatter.format(sunday);
     }
     
     private String formatMonthRange(Date monthStart) {
