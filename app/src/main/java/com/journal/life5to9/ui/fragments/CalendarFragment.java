@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,6 +46,7 @@ import java.util.Set;
 
 import com.google.android.material.button.MaterialButton;
 import com.journal.life5to9.data.entity.Category;
+import com.journal.life5to9.utils.CategoryEmojiMapper;
 import android.graphics.Color;
 
 import static com.kizitonwose.calendar.core.ExtensionsKt.daysOfWeek;
@@ -55,6 +58,7 @@ public class CalendarFragment extends Fragment {
     private ImageButton buttonPreviousMonth, buttonNextMonth;
     private MaterialButton buttonMonthView, buttonWeekView, buttonDayView;
     private LinearLayout layoutDayTitles;
+    private AutoCompleteTextView categoryFilterDropdown;
     private LinearLayout layoutSelectedDateDetails;
     private TextView textViewSelectedDateTitle;
     private TextView textViewNoActivitiesForDate;
@@ -76,6 +80,8 @@ public class CalendarFragment extends Fragment {
     private Set<LocalDate> activityDates = new HashSet<>();
     private Map<LocalDate, List<Activity>> activitiesByDate = new HashMap<>();
     private List<Category> categories = new ArrayList<>();
+    /** null = show all categories on calendar dots / day list */
+    private Long selectedCategoryIdForFilter = null;
     
     // View mode: 0 = Month, 1 = Week, 2 = Day
     private int currentViewMode = 0;
@@ -119,6 +125,7 @@ public class CalendarFragment extends Fragment {
         buttonWeekView = view.findViewById(R.id.buttonWeekView);
         buttonDayView = view.findViewById(R.id.buttonDayView);
         layoutDayTitles = view.findViewById(R.id.layoutDayTitles);
+        categoryFilterDropdown = view.findViewById(R.id.categoryFilterDropdown);
         layoutSelectedDateDetails = view.findViewById(R.id.layoutSelectedDateDetails);
         textViewSelectedDateTitle = view.findViewById(R.id.textViewSelectedDateTitle);
         textViewNoActivitiesForDate = view.findViewById(R.id.textViewNoActivitiesForDate);
@@ -137,6 +144,7 @@ public class CalendarFragment extends Fragment {
         
         // Setup view mode switcher
         setupViewModeSwitcher();
+        setupCategoryFilterDropdown();
         
         // Initialize current week and day
         LocalDate today = LocalDate.now();
@@ -151,6 +159,44 @@ public class CalendarFragment extends Fragment {
         
         // Set initial state
         updateViewModeButtons();
+    }
+
+    private void setupCategoryFilterDropdown() {
+        categoryFilterDropdown.setOnItemClickListener((parent, v, position, id) -> {
+            if (position == 0) {
+                selectedCategoryIdForFilter = null;
+            } else if (position > 0 && position - 1 < categories.size()) {
+                selectedCategoryIdForFilter = categories.get(position - 1).getId();
+            }
+            calendarView.notifyCalendarChanged();
+            refreshCurrentView();
+        });
+    }
+
+    private void updateCategoryFilterDropdown() {
+        List<String> names = new ArrayList<>();
+        names.add(getString(R.string.calendar_all_categories));
+        for (Category category : categories) {
+            String emoji = CategoryEmojiMapper.getEmojiForCategory(category.getName());
+            names.add(emoji + " " + category.getName());
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_dropdown_item_1line,
+                names);
+        categoryFilterDropdown.setAdapter(adapter);
+        if (selectedCategoryIdForFilter == null) {
+            categoryFilterDropdown.setText(names.get(0), false);
+        } else {
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getId() == selectedCategoryIdForFilter) {
+                    categoryFilterDropdown.setText(names.get(i + 1), false);
+                    return;
+                }
+            }
+            selectedCategoryIdForFilter = null;
+            categoryFilterDropdown.setText(names.get(0), false);
+        }
     }
     
     private void switchViewMode(int mode) {
@@ -278,8 +324,9 @@ public class CalendarFragment extends Fragment {
                 categoryIndicators.removeAllViews();
                 
                 if (day.getPosition() == DayPosition.MonthDate) {
-                    // Get activities for this date
-                    List<Activity> dayActivities = activitiesByDate.getOrDefault(day.getDate(), new ArrayList<>());
+                    // Get activities for this date (optional category filter for dots)
+                    List<Activity> dayActivities = activitiesForFilter(
+                            activitiesByDate.getOrDefault(day.getDate(), new ArrayList<>()));
                     
                     // Group activities by category
                     Map<Long, Integer> categoryCounts = new HashMap<>();
@@ -439,6 +486,7 @@ public class CalendarFragment extends Fragment {
             if (categoriesList != null) {
                 this.categories = categoriesList;
                 activityAdapter.setCategories(categoriesList);
+                updateCategoryFilterDropdown();
                 calendarView.notifyMonthChanged(currentCalendarMonth);
                 // Refresh current view
                 refreshCurrentView();
@@ -489,6 +537,19 @@ public class CalendarFragment extends Fragment {
             }
             activitiesByDate.get(activityDate).add(activity);
         }
+    }
+
+    private List<Activity> activitiesForFilter(List<Activity> dayActivities) {
+        if (selectedCategoryIdForFilter == null) {
+            return dayActivities;
+        }
+        List<Activity> filtered = new ArrayList<>();
+        for (Activity activity : dayActivities) {
+            if (activity.getCategoryId() == selectedCategoryIdForFilter) {
+                filtered.add(activity);
+            }
+        }
+        return filtered;
     }
 
     private void updateActivityDates(List<Activity> activities) {
@@ -589,8 +650,9 @@ public class CalendarFragment extends Fragment {
         // Clear existing indicators
         categoryIndicators.removeAllViews();
         
-        // Get activities for this date
-        List<Activity> dayActivities = activitiesByDate.getOrDefault(date, new ArrayList<>());
+        // Get activities for this date (optional category filter for dots)
+        List<Activity> dayActivities = activitiesForFilter(
+                activitiesByDate.getOrDefault(date, new ArrayList<>()));
         
         // Group activities by category
         Map<Long, Integer> categoryCounts = new HashMap<>();
@@ -701,8 +763,9 @@ public class CalendarFragment extends Fragment {
         headerText.setPadding(0, 0, 0, 16);
         layoutDayView.addView(headerText);
         
-        // Get activities for this day
-        List<Activity> dayActivities = activitiesByDate.getOrDefault(currentDay, new ArrayList<>());
+        // Get activities for this day (optional category filter)
+        List<Activity> dayActivities = activitiesForFilter(
+                activitiesByDate.getOrDefault(currentDay, new ArrayList<>()));
         
         if (dayActivities.isEmpty()) {
             TextView noActivitiesText = new TextView(getContext());
