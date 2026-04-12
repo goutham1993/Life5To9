@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +31,8 @@ import java.util.Set;
 public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummaryAdapter.CategorySummaryViewHolder> {
     
     private List<CategorySummaryItem> summaryItems = new ArrayList<>();
+    @Nullable
+    private Integer dayCountDenominator;
     
     public static class CategorySummaryItem {
         private String categoryName;
@@ -150,8 +153,9 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
         public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
     }
     
-    public void setSummaryItems(List<CategorySummaryItem> summaryItems) {
-        this.summaryItems = summaryItems;
+    public void setSummaryItems(List<CategorySummaryItem> summaryItems, @Nullable Integer dayCountDenominator) {
+        this.summaryItems = summaryItems != null ? summaryItems : new ArrayList<>();
+        this.dayCountDenominator = dayCountDenominator;
         notifyDataSetChanged();
     }
     
@@ -219,7 +223,12 @@ public class CategorySummaryAdapter extends RecyclerView.Adapter<CategorySummary
             }
             
             int daysCount = item.getDaysCount();
-            String hoursAndDaysText = String.format(Locale.getDefault(), "%s • %d days", timeDisplay, daysCount);
+            String hoursAndDaysText;
+            if (dayCountDenominator != null) {
+                hoursAndDaysText = String.format(Locale.getDefault(), "%s • %d/%d days", timeDisplay, daysCount, dayCountDenominator);
+            } else {
+                hoursAndDaysText = String.format(Locale.getDefault(), "%s • %d days", timeDisplay, daysCount);
+            }
             textViewDaysAndPercentage.setText(hoursAndDaysText);
             
             // Set category color

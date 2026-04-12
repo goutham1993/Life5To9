@@ -326,7 +326,7 @@ public class WeekendReportFragment extends Fragment {
             // Sort by time spent (descending)
             summaryItems.sort((a, b) -> Double.compare(b.getTimeSpent(), a.getTimeSpent()));
             
-            categoryAdapter.setSummaryItems(summaryItems);
+            categoryAdapter.setSummaryItems(summaryItems, null);
         });
     }
     

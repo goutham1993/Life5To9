@@ -619,7 +619,7 @@ public class SummaryFragment extends Fragment {
             android.util.Log.d("SummaryFragment", (i + 1) + ". " + item.getCategoryName() + ": " + item.getTimeSpent() + "h");
         }
         
-        weeklyAdapter.setSummaryItems(summaryItems);
+        weeklyAdapter.setSummaryItems(summaryItems, null);
     }
     
     private void updateWeekendCategoryBreakdown(List<Activity> activities) {
@@ -729,7 +729,7 @@ public class SummaryFragment extends Fragment {
             android.util.Log.d("SummaryFragment", (i + 1) + ". " + item.getCategoryName() + ": " + item.getTimeSpent() + "h");
         }
         
-        weekendAdapter.setSummaryItems(summaryItems);
+        weekendAdapter.setSummaryItems(summaryItems, null);
     }
     
     private void updateMonthlyCategoryBreakdown(List<Activity> activities) {
@@ -874,7 +874,10 @@ public class SummaryFragment extends Fragment {
             android.util.Log.d("SummaryFragment", (i + 1) + ". " + item.getCategoryName() + ": " + item.getTimeSpent() + "h");
         }
         
-        monthlyAdapter.setSummaryItems(summaryItems);
+        Integer monthlyDayDenominator = (currentMonthlyTabMode == MONTHLY_TAB_ALL)
+                ? getMonthlyAllTabDayDenominator(currentMonthStart)
+                : null;
+        monthlyAdapter.setSummaryItems(summaryItems, monthlyDayDenominator);
         
         // Set dynamic height for monthly RecyclerView based on number of categories
         setMonthlyRecyclerViewHeight(summaryItems.size());
@@ -1025,6 +1028,24 @@ public class SummaryFragment extends Fragment {
         
         return current.get(Calendar.YEAR) == month.get(Calendar.YEAR) &&
                current.get(Calendar.MONTH) == month.get(Calendar.MONTH);
+    }
+    
+    /**
+     * Denominator for "active days / …" in the monthly All tab: days elapsed in the month (inclusive of today)
+     * when viewing the current month; otherwise the number of days in that calendar month.
+     */
+    private int getMonthlyAllTabDayDenominator(Date monthStart) {
+        Calendar monthCal = Calendar.getInstance();
+        monthCal.setTime(monthStart);
+        Calendar now = Calendar.getInstance();
+        int my = monthCal.get(Calendar.YEAR);
+        int mm = monthCal.get(Calendar.MONTH);
+        int ny = now.get(Calendar.YEAR);
+        int nm = now.get(Calendar.MONTH);
+        if (my == ny && mm == nm) {
+            return now.get(Calendar.DAY_OF_MONTH);
+        }
+        return monthCal.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
     
     private String formatWeekdayRange(Date weekdayStart) {
