@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.journal.life5to9.data.database.AppDatabase;
+import com.journal.life5to9.data.repository.InsightsRepository;
 import com.journal.life5to9.data.repository.impl.ActivityRepositoryImpl;
 import com.journal.life5to9.data.repository.impl.CategoryRepositoryImpl;
 import com.journal.life5to9.service.impl.ActivityServiceImpl;
@@ -28,6 +29,7 @@ import com.journal.life5to9.ui.dialogs.AddCategoryDialog;
 import com.journal.life5to9.ui.fragments.ActivityFragment;
 import com.journal.life5to9.ui.fragments.CategoriesFragment;
 import com.journal.life5to9.utils.NotificationScheduler;
+import com.journal.life5to9.viewmodel.InsightsViewModel;
 import com.journal.life5to9.viewmodel.MainViewModel;
 import com.journal.life5to9.viewmodel.ViewModelFactory;
 
@@ -51,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         initializeViews();
         setupToolbar();
+        initializeViewModel();
         setupViewPager();
         setupFAB();
-        initializeViewModel();
         initializeNotifications();
         handleNotificationIntent();
     }
@@ -148,9 +150,17 @@ public class MainActivity extends AppCompatActivity {
         
         ActivityServiceImpl activityService = new ActivityServiceImpl(activityRepository);
         CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepository);
+        InsightsRepository insightsRepository = new InsightsRepository();
         
-        ViewModelFactory factory = new ViewModelFactory(activityService, categoryService);
+        ViewModelFactory factory = new ViewModelFactory(
+                activityService,
+                categoryService,
+                activityRepository,
+                categoryRepository,
+                insightsRepository
+        );
         viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
+        new ViewModelProvider(this, factory).get(InsightsViewModel.class);
     }
 
     private void showAddActivityDialog() {

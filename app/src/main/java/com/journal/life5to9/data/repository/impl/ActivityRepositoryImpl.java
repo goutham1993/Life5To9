@@ -40,6 +40,11 @@ public class ActivityRepositoryImpl implements ActivityRepository {
     public LiveData<List<Activity>> getActivitiesByDateRange(Date startDate, Date endDate) {
         return activityDao.getActivitiesByDateRange(startDate, endDate);
     }
+
+    @Override
+    public List<Activity> getActivitiesByDateRangeSync(Date startDate, Date endDate) {
+        return activityDao.getActivitiesByDateRangeSync(startDate, endDate);
+    }
     
     @Override
     public LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay) {

@@ -14,6 +14,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "INSIGHTS_BASE_URL", "\"http://192.168.1.238:8081/\"")
     }
 
     buildTypes {
@@ -31,6 +33,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -59,6 +62,12 @@ dependencies {
     
     // MPAndroidChart for insights charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Networking for AI insights
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

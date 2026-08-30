@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface CategoryRepository {
     LiveData<List<Category>> getAllCategories();
+    List<Category> getAllCategoriesSync();
     LiveData<Category> getCategoryById(long id);
     LiveData<List<Category>> getDefaultCategories();
     LiveData<List<Category>> getUserCategories();

@@ -45,4 +45,20 @@
     </string>
     <string name="calendar_filter_category_hint">Filter by category</string>
     <string name="calendar_all_categories">All categories</string>
+
+    <string name="ask_ai_title">Ask AI</string>
+    <string name="ask_ai_period_label">Period</string>
+    <string name="ask_ai_question_label">Question</string>
+    <string name="ask_ai_period_last_7_days">Last 7 days</string>
+    <string name="ask_ai_period_this_week">This week</string>
+    <string name="ask_ai_period_this_month">This month</string>
+    <string name="ask_ai_question_time_going">Where is my time going?</string>
+    <string name="ask_ai_question_balance">What\'s out of balance?</string>
+    <string name="ask_ai_question_do_more">What should I do more of?</string>
+    <string name="ask_ai_generate">Generate insights</string>
+    <string name="ask_ai_empty">No activities in this period. Track some time first, then try again.</string>
+    <string name="ask_ai_highlights">Highlights</string>
+    <string name="ask_ai_recommendations">Recommendations</string>
+    <string name="ask_ai_generating">Generating insights…</string>
+    <string name="category_insights_title">Category Insights</string>
 </resources>

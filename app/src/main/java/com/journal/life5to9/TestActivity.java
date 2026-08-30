@@ -37,7 +37,8 @@ public class TestActivity extends AppCompatActivity {
             ActivityServiceImpl activityService = new ActivityServiceImpl(activityRepository);
             CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepository);
             
-            ViewModelFactory factory = new ViewModelFactory(activityService, categoryService);
+            ViewModelFactory factory = new ViewModelFactory(
+                    activityService, categoryService, activityRepository, categoryRepository, null);
             MainViewModel viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
             
             // Test adding a sample activity

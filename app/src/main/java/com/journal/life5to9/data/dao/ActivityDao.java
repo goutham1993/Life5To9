@@ -30,6 +30,9 @@ public interface ActivityDao {
     
     @Query("SELECT * FROM activities WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     LiveData<List<Activity>> getActivitiesByDateRange(Date startDate, Date endDate);
+
+    @Query("SELECT * FROM activities WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
+    List<Activity> getActivitiesByDateRangeSync(Date startDate, Date endDate);
     
     @Query("SELECT * FROM activities WHERE date >= :startOfDay AND date < :endOfDay ORDER BY createdAt DESC")
     LiveData<List<Activity>> getActivitiesByDate(Date startOfDay, Date endOfDay);

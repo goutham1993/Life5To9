@@ -25,6 +25,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     public LiveData<List<Category>> getAllCategories() {
         return categoryDao.getAllCategories();
     }
+
+    @Override
+    public List<Category> getAllCategoriesSync() {
+        return categoryDao.getAllCategoriesSync();
+    }
     
     @Override
     public LiveData<Category> getCategoryById(long id) {

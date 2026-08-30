@@ -67,7 +67,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         CategoryRepositoryImpl categoryRepository = new CategoryRepositoryImpl(database.categoryDao());
         ActivityServiceImpl activityService = new ActivityServiceImpl(activityRepository);
         CategoryServiceImpl categoryService = new CategoryServiceImpl(categoryRepository);
-        ViewModelFactory factory = new ViewModelFactory(activityService, categoryService);
+        ViewModelFactory factory = new ViewModelFactory(
+                activityService, categoryService, activityRepository, categoryRepository, null);
         viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
     }
     
