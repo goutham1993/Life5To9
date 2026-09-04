@@ -25,47 +25,30 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.journal.life5to9.R;
 import com.journal.life5to9.data.entity.Activity;
 import com.journal.life5to9.data.entity.Category;
-import com.journal.life5to9.data.remote.InsightsPeriod;
-import com.journal.life5to9.data.remote.dto.InsightsResponse;
+import com.journal.life5to9.ui.dialogs.AskAiDialogFragment;
 import com.journal.life5to9.utils.CategoryEmojiMapper;
-import com.journal.life5to9.viewmodel.InsightsUiState;
-import com.journal.life5to9.viewmodel.InsightsViewModel;
 import com.journal.life5to9.viewmodel.MainViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 
 public class InsightsFragment extends Fragment {
 
     private MainViewModel viewModel;
-    private InsightsViewModel insightsViewModel;
 
-    // UI elements - Ask AI
-    private MaterialCardView cardAskAi;
-    private ChipGroup chipGroupPeriod;
-    private ChipGroup chipGroupQuestion;
-    private MaterialButton buttonGenerateInsights;
-    private LinearLayout layoutInsightsLoading;
-    private TextView textViewInsightsEmpty;
-    private TextView textViewInsightsError;
-    private LinearLayout layoutInsightsResult;
-    private TextView textViewInsightTitle;
-    private TextView textViewInsightSummary;
-    private TextView textViewHighlightsLabel;
-    private LinearLayout layoutInsightHighlights;
-    private TextView textViewRecommendationsLabel;
-    private LinearLayout layoutInsightRecommendations;
+    // UI elements - Ask AI bubble
+    private ExtendedFloatingActionButton fabAskAi;
 
     // UI elements - Category dropdown
     private AutoCompleteTextView categoryDropdown;
@@ -76,22 +59,42 @@ public class InsightsFragment extends Fragment {
     private MaterialButton buttonWeeklyNext;
     private TextView textViewWeeklyPeriodLabel;
     private TextView textViewWeeklyTotalHours;
+    private TextView textViewWeeklyTotalDays;
     private MaterialCardView cardWeeklyTotalHours;
     private MaterialCardView cardWeeklyChart;
+    private MaterialCardView cardWeeklyDaysChart;
     private BarChart weeklyBarChart;
+    private BarChart weeklyDaysBarChart;
     private LinearLayout layoutWeeklyEmptyState;
     private TextView textViewWeeklyEmptyMessage;
 
-    // UI elements - Monthly section
-    private MaterialButton buttonMonthlyPrevious;
-    private MaterialButton buttonMonthlyNext;
-    private TextView textViewMonthlyPeriodLabel;
-    private TextView textViewMonthlyTotalHours;
-    private MaterialCardView cardMonthlyTotalHours;
-    private MaterialCardView cardMonthlyChart;
-    private BarChart monthlyBarChart;
-    private LinearLayout layoutMonthlyEmptyState;
-    private TextView textViewMonthlyEmptyMessage;
+    // UI elements - Month section
+    private MaterialButton buttonMonthPrevious;
+    private MaterialButton buttonMonthNext;
+    private TextView textViewMonthPeriodLabel;
+    private TextView textViewMonthTotalHours;
+    private TextView textViewMonthTotalDays;
+    private MaterialCardView cardMonthTotal;
+    private MaterialCardView cardMonthHoursChart;
+    private MaterialCardView cardMonthDaysChart;
+    private BarChart monthHoursBarChart;
+    private BarChart monthDaysBarChart;
+    private LinearLayout layoutMonthEmptyState;
+    private TextView textViewMonthEmptyMessage;
+
+    // UI elements - Year section
+    private MaterialButton buttonYearlyPrevious;
+    private MaterialButton buttonYearlyNext;
+    private TextView textViewYearlyPeriodLabel;
+    private TextView textViewYearlyTotalHours;
+    private TextView textViewYearlyTotalDays;
+    private MaterialCardView cardYearlyTotal;
+    private MaterialCardView cardYearlyHoursChart;
+    private MaterialCardView cardYearlyDaysChart;
+    private BarChart yearlyHoursBarChart;
+    private BarChart yearlyDaysBarChart;
+    private LinearLayout layoutYearlyEmptyState;
+    private TextView textViewYearlyEmptyMessage;
 
     // Data
     private List<Category> categories = new ArrayList<>();
@@ -99,18 +102,20 @@ public class InsightsFragment extends Fragment {
 
     // Navigation state
     private Date currentWeekStart;
+    private Date currentMonthStart;
     private int currentYear;
 
     // Formatters
-    private SimpleDateFormat weekFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
-    private SimpleDateFormat dayOfWeekFormatter = new SimpleDateFormat("EEE", Locale.getDefault());
-    private SimpleDateFormat monthShortFormatter = new SimpleDateFormat("MMM", Locale.getDefault());
+    private final SimpleDateFormat weekFormatter = new SimpleDateFormat("MMM dd", Locale.getDefault());
+    private final SimpleDateFormat dayOfWeekFormatter = new SimpleDateFormat("EEE", Locale.getDefault());
+    private final SimpleDateFormat monthLabelFormatter = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+    private final SimpleDateFormat monthShortFormatter = new SimpleDateFormat("MMM", Locale.getDefault());
+    private final SimpleDateFormat dayKeyFormatter = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        insightsViewModel = new ViewModelProvider(requireActivity()).get(InsightsViewModel.class);
         initializeDates();
     }
 
@@ -127,7 +132,15 @@ public class InsightsFragment extends Fragment {
         calendar.set(Calendar.MILLISECOND, 0);
         currentWeekStart = calendar.getTime();
 
-        // Set current year
+        // Set month start to first day of current month
+        calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        currentMonthStart = calendar.getTime();
+
         currentYear = Calendar.getInstance().get(Calendar.YEAR);
     }
 
@@ -138,61 +151,67 @@ public class InsightsFragment extends Fragment {
 
         initializeViews(view);
         setupCardBackgrounds(view);
-        setupAskAiSection();
+        setupAskAiBubble();
         setupCategoryDropdown();
         setupNavigationButtons();
         updateWeeklyPeriodLabel();
-        updateMonthlyPeriodLabel();
+        updateMonthPeriodLabel();
+        updateYearlyPeriodLabel();
         observeCategories();
-        observeInsightsState();
 
         return view;
     }
 
     private void initializeViews(View view) {
-        cardAskAi = view.findViewById(R.id.cardAskAi);
-        chipGroupPeriod = view.findViewById(R.id.chipGroupPeriod);
-        chipGroupQuestion = view.findViewById(R.id.chipGroupQuestion);
-        buttonGenerateInsights = view.findViewById(R.id.buttonGenerateInsights);
-        layoutInsightsLoading = view.findViewById(R.id.layoutInsightsLoading);
-        textViewInsightsEmpty = view.findViewById(R.id.textViewInsightsEmpty);
-        textViewInsightsError = view.findViewById(R.id.textViewInsightsError);
-        layoutInsightsResult = view.findViewById(R.id.layoutInsightsResult);
-        textViewInsightTitle = view.findViewById(R.id.textViewInsightTitle);
-        textViewInsightSummary = view.findViewById(R.id.textViewInsightSummary);
-        textViewHighlightsLabel = view.findViewById(R.id.textViewHighlightsLabel);
-        layoutInsightHighlights = view.findViewById(R.id.layoutInsightHighlights);
-        textViewRecommendationsLabel = view.findViewById(R.id.textViewRecommendationsLabel);
-        layoutInsightRecommendations = view.findViewById(R.id.layoutInsightRecommendations);
-
-        // Category dropdown
+        fabAskAi = view.findViewById(R.id.fabAskAi);
         categoryDropdown = view.findViewById(R.id.categoryDropdown);
         categoryDropdownLayout = view.findViewById(R.id.categoryDropdownLayout);
 
-        // Weekly section
         buttonWeeklyPrevious = view.findViewById(R.id.buttonWeeklyPrevious);
         buttonWeeklyNext = view.findViewById(R.id.buttonWeeklyNext);
         textViewWeeklyPeriodLabel = view.findViewById(R.id.textViewWeeklyPeriodLabel);
         textViewWeeklyTotalHours = view.findViewById(R.id.textViewWeeklyTotalHours);
+        textViewWeeklyTotalDays = view.findViewById(R.id.textViewWeeklyTotalDays);
         cardWeeklyTotalHours = view.findViewById(R.id.cardWeeklyTotalHours);
         cardWeeklyChart = view.findViewById(R.id.cardWeeklyChart);
+        cardWeeklyDaysChart = view.findViewById(R.id.cardWeeklyDaysChart);
         weeklyBarChart = view.findViewById(R.id.weeklyBarChart);
+        weeklyDaysBarChart = view.findViewById(R.id.weeklyDaysBarChart);
         layoutWeeklyEmptyState = view.findViewById(R.id.layoutWeeklyEmptyState);
         textViewWeeklyEmptyMessage = view.findViewById(R.id.textViewWeeklyEmptyMessage);
 
-        // Monthly section
-        buttonMonthlyPrevious = view.findViewById(R.id.buttonMonthlyPrevious);
-        buttonMonthlyNext = view.findViewById(R.id.buttonMonthlyNext);
-        textViewMonthlyPeriodLabel = view.findViewById(R.id.textViewMonthlyPeriodLabel);
-        textViewMonthlyTotalHours = view.findViewById(R.id.textViewMonthlyTotalHours);
-        cardMonthlyTotalHours = view.findViewById(R.id.cardMonthlyTotalHours);
-        cardMonthlyChart = view.findViewById(R.id.cardMonthlyChart);
-        monthlyBarChart = view.findViewById(R.id.monthlyBarChart);
-        layoutMonthlyEmptyState = view.findViewById(R.id.layoutMonthlyEmptyState);
-        textViewMonthlyEmptyMessage = view.findViewById(R.id.textViewMonthlyEmptyMessage);
+        buttonMonthPrevious = view.findViewById(R.id.buttonMonthPrevious);
+        buttonMonthNext = view.findViewById(R.id.buttonMonthNext);
+        textViewMonthPeriodLabel = view.findViewById(R.id.textViewMonthPeriodLabel);
+        textViewMonthTotalHours = view.findViewById(R.id.textViewMonthTotalHours);
+        textViewMonthTotalDays = view.findViewById(R.id.textViewMonthTotalDays);
+        cardMonthTotal = view.findViewById(R.id.cardMonthTotal);
+        cardMonthHoursChart = view.findViewById(R.id.cardMonthHoursChart);
+        cardMonthDaysChart = view.findViewById(R.id.cardMonthDaysChart);
+        monthHoursBarChart = view.findViewById(R.id.monthHoursBarChart);
+        monthDaysBarChart = view.findViewById(R.id.monthDaysBarChart);
+        layoutMonthEmptyState = view.findViewById(R.id.layoutMonthEmptyState);
+        textViewMonthEmptyMessage = view.findViewById(R.id.textViewMonthEmptyMessage);
 
-        setupBarChart(weeklyBarChart);
-        setupBarChart(monthlyBarChart);
+        buttonYearlyPrevious = view.findViewById(R.id.buttonYearlyPrevious);
+        buttonYearlyNext = view.findViewById(R.id.buttonYearlyNext);
+        textViewYearlyPeriodLabel = view.findViewById(R.id.textViewYearlyPeriodLabel);
+        textViewYearlyTotalHours = view.findViewById(R.id.textViewYearlyTotalHours);
+        textViewYearlyTotalDays = view.findViewById(R.id.textViewYearlyTotalDays);
+        cardYearlyTotal = view.findViewById(R.id.cardYearlyTotal);
+        cardYearlyHoursChart = view.findViewById(R.id.cardYearlyHoursChart);
+        cardYearlyDaysChart = view.findViewById(R.id.cardYearlyDaysChart);
+        yearlyHoursBarChart = view.findViewById(R.id.yearlyHoursBarChart);
+        yearlyDaysBarChart = view.findViewById(R.id.yearlyDaysBarChart);
+        layoutYearlyEmptyState = view.findViewById(R.id.layoutYearlyEmptyState);
+        textViewYearlyEmptyMessage = view.findViewById(R.id.textViewYearlyEmptyMessage);
+
+        setupHoursBarChart(weeklyBarChart);
+        setupDaysBarChart(weeklyDaysBarChart);
+        setupHoursBarChart(monthHoursBarChart);
+        setupDaysBarChart(monthDaysBarChart);
+        setupHoursBarChart(yearlyHoursBarChart);
+        setupDaysBarChart(yearlyDaysBarChart);
     }
 
     private void setupCardBackgrounds(View view) {
@@ -208,10 +227,10 @@ public class InsightsFragment extends Fragment {
         }
 
         MaterialCardView[] cards = {
-                cardAskAi,
                 view.findViewById(R.id.cardCategoryDropdown),
-                cardWeeklyTotalHours, cardWeeklyChart,
-                cardMonthlyTotalHours, cardMonthlyChart
+                cardWeeklyTotalHours, cardWeeklyChart, cardWeeklyDaysChart,
+                cardMonthTotal, cardMonthHoursChart, cardMonthDaysChart,
+                cardYearlyTotal, cardYearlyHoursChart, cardYearlyDaysChart
         };
         for (MaterialCardView card : cards) {
             if (card != null) {
@@ -220,7 +239,28 @@ public class InsightsFragment extends Fragment {
         }
     }
 
-    private void setupBarChart(BarChart chart) {
+    private void setupHoursBarChart(BarChart chart) {
+        setupBarChartBase(chart);
+        chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(Locale.getDefault(), "%.1fh", value);
+            }
+        });
+    }
+
+    private void setupDaysBarChart(BarChart chart) {
+        setupBarChartBase(chart);
+        chart.getAxisLeft().setGranularity(1f);
+        chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format(Locale.getDefault(), "%.0f", value);
+            }
+        });
+    }
+
+    private void setupBarChartBase(BarChart chart) {
         chart.getDescription().setEnabled(false);
         chart.setDrawGridBackground(false);
         chart.setDrawBarShadow(false);
@@ -232,13 +272,11 @@ public class InsightsFragment extends Fragment {
         chart.setFitBars(true);
         chart.setExtraBottomOffset(10f);
 
-        // Check dark mode for text colors
         int nightModeFlags = getContext().getResources().getConfiguration().uiMode
                 & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         boolean isDarkTheme = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
         int textColor = isDarkTheme ? Color.WHITE : Color.DKGRAY;
 
-        // X axis
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
@@ -246,154 +284,24 @@ public class InsightsFragment extends Fragment {
         xAxis.setTextSize(12f);
         xAxis.setTextColor(textColor);
 
-        // Y axis (left)
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setAxisMinimum(0f);
         leftAxis.setDrawGridLines(true);
         leftAxis.setGridColor(Color.LTGRAY);
         leftAxis.setTextSize(12f);
         leftAxis.setTextColor(textColor);
-        leftAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                return String.format(Locale.getDefault(), "%.1fh", value);
-            }
-        });
 
-        // Y axis (right) - disabled
         chart.getAxisRight().setEnabled(false);
     }
 
-    private void setupAskAiSection() {
-        chipGroupPeriod.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.isEmpty()) {
+    private void setupAskAiBubble() {
+        fabAskAi.setOnClickListener(v -> {
+            if (getParentFragmentManager().findFragmentByTag(AskAiDialogFragment.TAG) != null) {
                 return;
             }
-            int checkedId = checkedIds.get(0);
-            if (checkedId == R.id.chipPeriodLast7Days) {
-                insightsViewModel.setPeriod(InsightsPeriod.LAST_7_DAYS);
-            } else if (checkedId == R.id.chipPeriodThisWeek) {
-                insightsViewModel.setPeriod(InsightsPeriod.THIS_WEEK);
-            } else if (checkedId == R.id.chipPeriodThisMonth) {
-                insightsViewModel.setPeriod(InsightsPeriod.THIS_MONTH);
-            }
+            AskAiDialogFragment.newInstance().show(getParentFragmentManager(), AskAiDialogFragment.TAG);
         });
-
-        chipGroupQuestion.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.isEmpty()) {
-                return;
-            }
-            int checkedId = checkedIds.get(0);
-            if (checkedId == R.id.chipQuestionTimeGoing) {
-                insightsViewModel.setQuestion(getString(R.string.ask_ai_question_time_going));
-            } else if (checkedId == R.id.chipQuestionBalance) {
-                insightsViewModel.setQuestion(getString(R.string.ask_ai_question_balance));
-            } else if (checkedId == R.id.chipQuestionDoMore) {
-                insightsViewModel.setQuestion(getString(R.string.ask_ai_question_do_more));
-            }
-        });
-
-        buttonGenerateInsights.setOnClickListener(v -> insightsViewModel.generateInsights());
     }
-
-    private void observeInsightsState() {
-        insightsViewModel.getUiState().observe(getViewLifecycleOwner(), this::renderInsightsState);
-    }
-
-    private void renderInsightsState(InsightsUiState state) {
-        if (state == null) {
-            return;
-        }
-
-        syncChipSelection(state);
-
-        boolean loading = state.getStatus() == InsightsUiState.Status.LOADING;
-        buttonGenerateInsights.setEnabled(!loading);
-        layoutInsightsLoading.setVisibility(loading ? View.VISIBLE : View.GONE);
-        textViewInsightsEmpty.setVisibility(
-                state.getStatus() == InsightsUiState.Status.EMPTY ? View.VISIBLE : View.GONE);
-
-        if (state.getStatus() == InsightsUiState.Status.ERROR) {
-            textViewInsightsError.setVisibility(View.VISIBLE);
-            textViewInsightsError.setText(state.getErrorMessage());
-        } else {
-            textViewInsightsError.setVisibility(View.GONE);
-        }
-
-        if (state.getStatus() == InsightsUiState.Status.SUCCESS && state.getResponse() != null) {
-            bindInsightResult(state.getResponse());
-            layoutInsightsResult.setVisibility(View.VISIBLE);
-        } else {
-            layoutInsightsResult.setVisibility(View.GONE);
-        }
-    }
-
-    private void syncChipSelection(InsightsUiState state) {
-        int periodChipId = R.id.chipPeriodLast7Days;
-        if (state.getPeriod() == InsightsPeriod.THIS_WEEK) {
-            periodChipId = R.id.chipPeriodThisWeek;
-        } else if (state.getPeriod() == InsightsPeriod.THIS_MONTH) {
-            periodChipId = R.id.chipPeriodThisMonth;
-        }
-        if (chipGroupPeriod.getCheckedChipId() != periodChipId) {
-            chipGroupPeriod.check(periodChipId);
-        }
-
-        int questionChipId = R.id.chipQuestionTimeGoing;
-        String question = state.getQuestion();
-        if (getString(R.string.ask_ai_question_balance).equals(question)) {
-            questionChipId = R.id.chipQuestionBalance;
-        } else if (getString(R.string.ask_ai_question_do_more).equals(question)) {
-            questionChipId = R.id.chipQuestionDoMore;
-        }
-        if (chipGroupQuestion.getCheckedChipId() != questionChipId) {
-            chipGroupQuestion.check(questionChipId);
-        }
-    }
-
-    private void bindInsightResult(InsightsResponse response) {
-        String title = response.getTitle();
-        if (title != null && !title.trim().isEmpty()) {
-            textViewInsightTitle.setVisibility(View.VISIBLE);
-            textViewInsightTitle.setText(title);
-        } else {
-            textViewInsightTitle.setVisibility(View.GONE);
-        }
-
-        String summary = response.getSummary();
-        if (summary != null && !summary.trim().isEmpty()) {
-            textViewInsightSummary.setVisibility(View.VISIBLE);
-            textViewInsightSummary.setText(summary);
-        } else {
-            textViewInsightSummary.setVisibility(View.GONE);
-        }
-
-        populateBulletList(layoutInsightHighlights, textViewHighlightsLabel, response.getHighlights());
-        populateBulletList(layoutInsightRecommendations, textViewRecommendationsLabel, response.getRecommendations());
-    }
-
-    private void populateBulletList(LinearLayout container, TextView label, List<String> items) {
-        container.removeAllViews();
-        if (items == null || items.isEmpty()) {
-            label.setVisibility(View.GONE);
-            return;
-        }
-
-        label.setVisibility(View.VISIBLE);
-        for (String item : items) {
-            TextView bullet = new TextView(requireContext());
-            bullet.setText("• " + item);
-            bullet.setTextSize(14);
-            bullet.setTextColor(requireContext().getColor(R.color.on_surface));
-            bullet.setPadding(0, dpToPx(4), 0, dpToPx(4));
-            container.addView(bullet);
-        }
-    }
-
-    private int dpToPx(int dp) {
-        return Math.round(dp * getResources().getDisplayMetrics().density);
-    }
-
     private void setupCategoryDropdown() {
         categoryDropdown.setOnItemClickListener((parent, view, position, id) -> {
             if (position >= 0 && position < categories.size()) {
@@ -404,7 +312,6 @@ public class InsightsFragment extends Fragment {
     }
 
     private void setupNavigationButtons() {
-        // Weekly navigation
         buttonWeeklyPrevious.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(currentWeekStart);
@@ -426,19 +333,39 @@ public class InsightsFragment extends Fragment {
             }
         });
 
-        // Year navigation for monthly chart
-        buttonMonthlyPrevious.setOnClickListener(v -> {
-            currentYear--;
-            updateMonthlyPeriodLabel();
+        buttonMonthPrevious.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(currentMonthStart);
+            calendar.add(Calendar.MONTH, -1);
+            currentMonthStart = calendar.getTime();
+            updateMonthPeriodLabel();
             if (selectedCategory != null) {
-                loadMonthlyData();
+                loadMonthData();
             }
         });
-        buttonMonthlyNext.setOnClickListener(v -> {
-            currentYear++;
-            updateMonthlyPeriodLabel();
+        buttonMonthNext.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(currentMonthStart);
+            calendar.add(Calendar.MONTH, 1);
+            currentMonthStart = calendar.getTime();
+            updateMonthPeriodLabel();
             if (selectedCategory != null) {
-                loadMonthlyData();
+                loadMonthData();
+            }
+        });
+
+        buttonYearlyPrevious.setOnClickListener(v -> {
+            currentYear--;
+            updateYearlyPeriodLabel();
+            if (selectedCategory != null) {
+                loadYearlyData();
+            }
+        });
+        buttonYearlyNext.setOnClickListener(v -> {
+            currentYear++;
+            updateYearlyPeriodLabel();
+            if (selectedCategory != null) {
+                loadYearlyData();
             }
         });
     }
@@ -482,12 +409,20 @@ public class InsightsFragment extends Fragment {
         }
     }
 
-    private void updateMonthlyPeriodLabel() {
+    private void updateMonthPeriodLabel() {
+        if (isCurrentMonth()) {
+            textViewMonthPeriodLabel.setText("This Month");
+        } else {
+            textViewMonthPeriodLabel.setText(monthLabelFormatter.format(currentMonthStart));
+        }
+    }
+
+    private void updateYearlyPeriodLabel() {
         int thisYear = Calendar.getInstance().get(Calendar.YEAR);
         if (currentYear == thisYear) {
-            textViewMonthlyPeriodLabel.setText(String.valueOf(currentYear) + " (This Year)");
+            textViewYearlyPeriodLabel.setText(currentYear + " (This Year)");
         } else {
-            textViewMonthlyPeriodLabel.setText(String.valueOf(currentYear));
+            textViewYearlyPeriodLabel.setText(String.valueOf(currentYear));
         }
     }
 
@@ -499,22 +434,42 @@ public class InsightsFragment extends Fragment {
                 current.get(Calendar.WEEK_OF_YEAR) == week.get(Calendar.WEEK_OF_YEAR);
     }
 
-    
+    private boolean isCurrentMonth() {
+        Calendar current = Calendar.getInstance();
+        Calendar month = Calendar.getInstance();
+        month.setTime(currentMonthStart);
+        return current.get(Calendar.YEAR) == month.get(Calendar.YEAR) &&
+                current.get(Calendar.MONTH) == month.get(Calendar.MONTH);
+    }
 
     // ============ Load Data ============
 
     private void loadAllChartData() {
         if (selectedCategory == null) {
             showWeeklyEmptyState("Select a category to see weekly insights");
-            showMonthlyEmptyState("Select a category to see monthly insights");
+            showMonthEmptyState("Select a category to see monthly insights");
+            showYearlyEmptyState("Select a category to see yearly insights");
             return;
         }
         loadWeeklyData();
-        loadMonthlyData();
+        loadMonthData();
+        loadYearlyData();
+    }
+
+    private List<Activity> filterBySelectedCategory(List<Activity> activities) {
+        List<Activity> filtered = new ArrayList<>();
+        if (activities == null || selectedCategory == null) {
+            return filtered;
+        }
+        for (Activity activity : activities) {
+            if (activity.getCategoryId() == selectedCategory.getId()) {
+                filtered.add(activity);
+            }
+        }
+        return filtered;
     }
 
     private void loadWeeklyData() {
-        // Calculate week range: Monday to Sunday
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(currentWeekStart);
         Date weekStart = calendar.getTime();
@@ -534,55 +489,131 @@ public class InsightsFragment extends Fragment {
                 return;
             }
 
-            // Filter by selected category
-            List<Activity> filtered = new ArrayList<>();
-            for (Activity activity : activities) {
-                if (activity.getCategoryId() == selectedCategory.getId()) {
-                    filtered.add(activity);
-                }
-            }
-
+            List<Activity> filtered = filterBySelectedCategory(activities);
             if (filtered.isEmpty()) {
                 showWeeklyEmptyState("No activities for this category this week");
                 return;
             }
 
-            // Group by day of week (Mon-Sun)
-            Map<Integer, Double> dailyHours = new HashMap<>();
+            double[] dailyHours = new double[7];
+            int[] dailyActive = new int[7];
+            Set<String>[] dayKeys = new Set[7];
             for (int i = 0; i < 7; i++) {
-                dailyHours.put(i, 0.0);
+                dayKeys[i] = new HashSet<>();
             }
 
             Calendar activityCal = Calendar.getInstance();
             for (Activity activity : filtered) {
                 activityCal.setTime(activity.getDate());
                 int dayOfWeek = activityCal.get(Calendar.DAY_OF_WEEK);
-                // Convert to Mon=0, Tue=1, ..., Sun=6
                 int index = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
-                dailyHours.put(index, dailyHours.get(index) + activity.getTimeSpentHours());
+                dailyHours[index] += activity.getTimeSpentHours();
+                dayKeys[index].add(dayKeyFormatter.format(activity.getDate()));
             }
 
-            // Build chart entries
-            List<BarEntry> entries = new ArrayList<>();
+            List<BarEntry> hoursEntries = new ArrayList<>();
+            List<BarEntry> daysEntries = new ArrayList<>();
             String[] labels = new String[7];
             Calendar labelCal = Calendar.getInstance();
             labelCal.setTime(currentWeekStart);
 
-            double total = 0;
+            double totalHours = 0;
+            int totalDays = 0;
+            Set<String> uniqueDays = new HashSet<>();
+
             for (int i = 0; i < 7; i++) {
-                float value = dailyHours.get(i).floatValue();
-                entries.add(new BarEntry(i, value));
+                hoursEntries.add(new BarEntry(i, (float) dailyHours[i]));
+                dailyActive[i] = dayKeys[i].isEmpty() ? 0 : 1;
+                daysEntries.add(new BarEntry(i, dailyActive[i]));
                 labels[i] = dayOfWeekFormatter.format(labelCal.getTime());
                 labelCal.add(Calendar.DAY_OF_MONTH, 1);
-                total += value;
+                totalHours += dailyHours[i];
+                uniqueDays.addAll(dayKeys[i]);
             }
+            totalDays = uniqueDays.size();
 
-            updateWeeklyChart(entries, labels, total);
+            updateWeeklyCharts(hoursEntries, daysEntries, labels, totalHours, totalDays);
         });
     }
 
-    private void loadMonthlyData() {
-        // Calculate full year range: Jan 1 to Dec 31
+    private void loadMonthData() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentMonthStart);
+        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        Date monthStart = calendar.getTime();
+
+        calendar.set(Calendar.DAY_OF_MONTH, daysInMonth);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date monthEnd = calendar.getTime();
+
+        viewModel.getActivitiesForDateRange(monthStart, monthEnd).observe(getViewLifecycleOwner(), activities -> {
+            if (selectedCategory == null) return;
+
+            if (activities == null) {
+                showMonthEmptyState("No data available for this month");
+                return;
+            }
+
+            List<Activity> filtered = filterBySelectedCategory(activities);
+            if (filtered.isEmpty()) {
+                showMonthEmptyState("No activities for this category this month");
+                return;
+            }
+
+            double[] dailyHours = new double[daysInMonth];
+            Set<String>[] dailyKeys = new Set[daysInMonth];
+            for (int i = 0; i < daysInMonth; i++) {
+                dailyKeys[i] = new HashSet<>();
+            }
+
+            // Week-of-month buckets: days 1-7, 8-14, 15-21, 22-28, 29-31
+            int weekBucketCount = (daysInMonth + 6) / 7;
+            Set<String>[] weekDayKeys = new Set[weekBucketCount];
+            for (int i = 0; i < weekBucketCount; i++) {
+                weekDayKeys[i] = new HashSet<>();
+            }
+
+            Calendar activityCal = Calendar.getInstance();
+            for (Activity activity : filtered) {
+                activityCal.setTime(activity.getDate());
+                int dayIndex = activityCal.get(Calendar.DAY_OF_MONTH) - 1;
+                if (dayIndex < 0 || dayIndex >= daysInMonth) continue;
+
+                String key = dayKeyFormatter.format(activity.getDate());
+                dailyHours[dayIndex] += activity.getTimeSpentHours();
+                dailyKeys[dayIndex].add(key);
+
+                int weekIndex = dayIndex / 7;
+                weekDayKeys[weekIndex].add(key);
+            }
+
+            List<BarEntry> hoursEntries = new ArrayList<>();
+            String[] dayLabels = new String[daysInMonth];
+            double totalHours = 0;
+            Set<String> uniqueDays = new HashSet<>();
+
+            for (int i = 0; i < daysInMonth; i++) {
+                hoursEntries.add(new BarEntry(i, (float) dailyHours[i]));
+                dayLabels[i] = String.valueOf(i + 1);
+                totalHours += dailyHours[i];
+                uniqueDays.addAll(dailyKeys[i]);
+            }
+
+            List<BarEntry> daysEntries = new ArrayList<>();
+            String[] weekLabels = new String[weekBucketCount];
+            for (int i = 0; i < weekBucketCount; i++) {
+                daysEntries.add(new BarEntry(i, weekDayKeys[i].size()));
+                weekLabels[i] = "W" + (i + 1);
+            }
+
+            updateMonthCharts(hoursEntries, dayLabels, daysEntries, weekLabels, totalHours, uniqueDays.size(), daysInMonth);
+        });
+    }
+
+    private void loadYearlyData() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(currentYear, Calendar.JANUARY, 1, 0, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -596,97 +627,102 @@ public class InsightsFragment extends Fragment {
             if (selectedCategory == null) return;
 
             if (activities == null) {
-                showMonthlyEmptyState("No data available for " + currentYear);
+                showYearlyEmptyState("No data available for " + currentYear);
                 return;
             }
 
-            // Filter by selected category
-            List<Activity> filtered = new ArrayList<>();
-            for (Activity activity : activities) {
-                if (activity.getCategoryId() == selectedCategory.getId()) {
-                    filtered.add(activity);
-                }
-            }
-
+            List<Activity> filtered = filterBySelectedCategory(activities);
             if (filtered.isEmpty()) {
-                showMonthlyEmptyState("No activities for this category in " + currentYear);
+                showYearlyEmptyState("No activities for this category in " + currentYear);
                 return;
             }
 
-            // Group hours by month (0=Jan .. 11=Dec)
             double[] monthlyHours = new double[12];
+            Set<String>[] monthlyDayKeys = new Set[12];
+            for (int i = 0; i < 12; i++) {
+                monthlyDayKeys[i] = new HashSet<>();
+            }
+
             Calendar activityCal = Calendar.getInstance();
             for (Activity activity : filtered) {
                 activityCal.setTime(activity.getDate());
-                int month = activityCal.get(Calendar.MONTH); // 0-based
+                int month = activityCal.get(Calendar.MONTH);
                 monthlyHours[month] += activity.getTimeSpentHours();
+                monthlyDayKeys[month].add(dayKeyFormatter.format(activity.getDate()));
             }
 
-            // Build chart entries and labels
-            List<BarEntry> entries = new ArrayList<>();
+            List<BarEntry> hoursEntries = new ArrayList<>();
+            List<BarEntry> daysEntries = new ArrayList<>();
             String[] labels = new String[12];
             Calendar labelCal = Calendar.getInstance();
-            double total = 0;
+            double totalHours = 0;
+            Set<String> allDays = new HashSet<>();
 
             for (int i = 0; i < 12; i++) {
-                entries.add(new BarEntry(i, (float) monthlyHours[i]));
+                hoursEntries.add(new BarEntry(i, (float) monthlyHours[i]));
+                daysEntries.add(new BarEntry(i, monthlyDayKeys[i].size()));
                 labelCal.set(currentYear, i, 1);
                 labels[i] = monthShortFormatter.format(labelCal.getTime());
-                total += monthlyHours[i];
+                totalHours += monthlyHours[i];
+                allDays.addAll(monthlyDayKeys[i]);
             }
 
-            updateMonthlyChart(entries, labels, total);
+            updateYearlyCharts(hoursEntries, daysEntries, labels, totalHours, allDays.size());
         });
     }
 
     // ============ Update Charts ============
 
-    private void updateWeeklyChart(List<BarEntry> entries, String[] labels, double totalHours) {
+    private void updateWeeklyCharts(List<BarEntry> hoursEntries, List<BarEntry> daysEntries,
+                                    String[] labels, double totalHours, int totalDays) {
         weeklyBarChart.setVisibility(View.VISIBLE);
         layoutWeeklyEmptyState.setVisibility(View.GONE);
         cardWeeklyTotalHours.setVisibility(View.VISIBLE);
+        cardWeeklyDaysChart.setVisibility(View.VISIBLE);
 
         textViewWeeklyTotalHours.setText(String.format(Locale.getDefault(), "%.1fh", totalHours));
+        textViewWeeklyTotalDays.setText(String.format(Locale.getDefault(), "• %d/7 days", totalDays));
 
-        int barColor = getCategoryColor();
-
-        BarDataSet dataSet = new BarDataSet(entries, "Hours");
-        dataSet.setColor(barColor);
-        dataSet.setValueTextSize(11f);
-        dataSet.setValueTextColor(getChartTextColor());
-        dataSet.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                if (value == 0) return "";
-                return String.format(Locale.getDefault(), "%.1f", value);
-            }
-        });
-
-        BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.6f);
-
-        weeklyBarChart.setData(barData);
-
-        XAxis xAxis = weeklyBarChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-        xAxis.setLabelCount(labels.length);
-
-        weeklyBarChart.animateY(500);
-        weeklyBarChart.invalidate();
+        applyHoursChart(weeklyBarChart, hoursEntries, labels, 0.6f, 11f, false);
+        applyDaysChart(weeklyDaysBarChart, daysEntries, labels, 0.6f, 11f, false);
     }
 
-    private void updateMonthlyChart(List<BarEntry> entries, String[] labels, double totalHours) {
-        monthlyBarChart.setVisibility(View.VISIBLE);
-        layoutMonthlyEmptyState.setVisibility(View.GONE);
-        cardMonthlyTotalHours.setVisibility(View.VISIBLE);
+    private void updateMonthCharts(List<BarEntry> hoursEntries, String[] dayLabels,
+                                   List<BarEntry> daysEntries, String[] weekLabels,
+                                   double totalHours, int totalDays, int daysInMonth) {
+        monthHoursBarChart.setVisibility(View.VISIBLE);
+        layoutMonthEmptyState.setVisibility(View.GONE);
+        cardMonthTotal.setVisibility(View.VISIBLE);
+        cardMonthDaysChart.setVisibility(View.VISIBLE);
 
-        textViewMonthlyTotalHours.setText(String.format(Locale.getDefault(), "%.1fh", totalHours));
+        textViewMonthTotalHours.setText(String.format(Locale.getDefault(), "%.1fh", totalHours));
+        textViewMonthTotalDays.setText(String.format(Locale.getDefault(), "• %d/%d days", totalDays, daysInMonth));
 
+        applyHoursChart(monthHoursBarChart, hoursEntries, dayLabels, 0.7f, 9f, true);
+        applyDaysChart(monthDaysBarChart, daysEntries, weekLabels, 0.6f, 11f, false);
+    }
+
+    private void updateYearlyCharts(List<BarEntry> hoursEntries, List<BarEntry> daysEntries,
+                                    String[] labels, double totalHours, int totalDays) {
+        yearlyHoursBarChart.setVisibility(View.VISIBLE);
+        layoutYearlyEmptyState.setVisibility(View.GONE);
+        cardYearlyTotal.setVisibility(View.VISIBLE);
+        cardYearlyDaysChart.setVisibility(View.VISIBLE);
+
+        textViewYearlyTotalHours.setText(String.format(Locale.getDefault(), "%.1fh", totalHours));
+        textViewYearlyTotalDays.setText(String.format(Locale.getDefault(), "• %d days", totalDays));
+
+        applyHoursChart(yearlyHoursBarChart, hoursEntries, labels, 0.7f, 10f, true);
+        applyDaysChart(yearlyDaysBarChart, daysEntries, labels, 0.7f, 10f, true);
+    }
+
+    private void applyHoursChart(BarChart chart, List<BarEntry> entries, String[] labels,
+                                 float barWidth, float valueTextSize, boolean rotateLabels) {
         int barColor = getCategoryColor();
 
         BarDataSet dataSet = new BarDataSet(entries, "Hours");
         dataSet.setColor(barColor);
-        dataSet.setValueTextSize(10f);
+        dataSet.setValueTextSize(valueTextSize);
         dataSet.setValueTextColor(getChartTextColor());
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
@@ -697,19 +733,53 @@ public class InsightsFragment extends Fragment {
         });
 
         BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.7f);
+        barData.setBarWidth(barWidth);
+        chart.setData(barData);
 
-        monthlyBarChart.setData(barData);
-
-        // X-axis: fit all 12 month labels
-        XAxis xAxis = monthlyBarChart.getXAxis();
+        XAxis xAxis = chart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         xAxis.setLabelCount(labels.length, false);
-        xAxis.setTextSize(10f);
-        xAxis.setLabelRotationAngle(-45f);
+        xAxis.setTextSize(rotateLabels ? 10f : 12f);
+        xAxis.setLabelRotationAngle(rotateLabels ? -45f : 0f);
 
-        monthlyBarChart.animateY(500);
-        monthlyBarChart.invalidate();
+        chart.animateY(500);
+        chart.invalidate();
+    }
+
+    private void applyDaysChart(BarChart chart, List<BarEntry> entries, String[] labels,
+                                float barWidth, float valueTextSize, boolean rotateLabels) {
+        int barColor = getCategoryColor();
+
+        BarDataSet dataSet = new BarDataSet(entries, "Days");
+        dataSet.setColor(barColor);
+        dataSet.setValueTextSize(valueTextSize);
+        dataSet.setValueTextColor(getChartTextColor());
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                if (value == 0) return "";
+                return String.format(Locale.getDefault(), "%.0f", value);
+            }
+        });
+
+        BarData barData = new BarData(dataSet);
+        barData.setBarWidth(barWidth);
+        chart.setData(barData);
+
+        float maxVal = 0f;
+        for (BarEntry entry : entries) {
+            maxVal = Math.max(maxVal, entry.getY());
+        }
+        chart.getAxisLeft().setAxisMaximum(Math.max(maxVal, 1f) + 0.5f);
+
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setLabelCount(labels.length, false);
+        xAxis.setTextSize(rotateLabels ? 10f : 12f);
+        xAxis.setLabelRotationAngle(rotateLabels ? -45f : 0f);
+
+        chart.animateY(500);
+        chart.invalidate();
     }
 
     // ============ Empty States ============
@@ -718,16 +788,30 @@ public class InsightsFragment extends Fragment {
         weeklyBarChart.setVisibility(View.GONE);
         layoutWeeklyEmptyState.setVisibility(View.VISIBLE);
         cardWeeklyTotalHours.setVisibility(View.GONE);
+        cardWeeklyDaysChart.setVisibility(View.GONE);
         textViewWeeklyEmptyMessage.setText(message);
         weeklyBarChart.clear();
+        weeklyDaysBarChart.clear();
     }
 
-    private void showMonthlyEmptyState(String message) {
-        monthlyBarChart.setVisibility(View.GONE);
-        layoutMonthlyEmptyState.setVisibility(View.VISIBLE);
-        cardMonthlyTotalHours.setVisibility(View.GONE);
-        textViewMonthlyEmptyMessage.setText(message);
-        monthlyBarChart.clear();
+    private void showMonthEmptyState(String message) {
+        monthHoursBarChart.setVisibility(View.GONE);
+        layoutMonthEmptyState.setVisibility(View.VISIBLE);
+        cardMonthTotal.setVisibility(View.GONE);
+        cardMonthDaysChart.setVisibility(View.GONE);
+        textViewMonthEmptyMessage.setText(message);
+        monthHoursBarChart.clear();
+        monthDaysBarChart.clear();
+    }
+
+    private void showYearlyEmptyState(String message) {
+        yearlyHoursBarChart.setVisibility(View.GONE);
+        layoutYearlyEmptyState.setVisibility(View.VISIBLE);
+        cardYearlyTotal.setVisibility(View.GONE);
+        cardYearlyDaysChart.setVisibility(View.GONE);
+        textViewYearlyEmptyMessage.setText(message);
+        yearlyHoursBarChart.clear();
+        yearlyDaysBarChart.clear();
     }
 
     // ============ Helpers ============

@@ -54,4 +54,18 @@
         <item name="tabSelectedTextColor">@color/primary</item>
         <item name="tabIndicatorColor">@color/primary</item>
     </style>
+
+    <style name="Theme.Life5To9.FullScreenDialog" parent="Theme.Life5To9">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+    </style>
+
+    <style name="ShapeAppearance.Life5To9.AskAiComposer" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
 </resources>

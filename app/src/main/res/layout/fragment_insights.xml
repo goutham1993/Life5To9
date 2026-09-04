@@ -1,241 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:fillViewport="true">
+    android:background="@color/background">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp">
 
-        <!-- Ask AI -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardAskAi"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            android:layout_marginBottom="24dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Title -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ask_ai_title"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/on_surface"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ask_ai_period_label"
-                    android:textSize="14sp"
-                    android:textColor="@color/on_surface_variant"
-                    android:layout_marginBottom="8dp" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupPeriod"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:selectionRequired="true"
-                    app:singleLine="false"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipPeriodLast7Days"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/ask_ai_period_last_7_days" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipPeriodThisWeek"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ask_ai_period_this_week" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipPeriodThisMonth"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ask_ai_period_this_month" />
-                </com.google.android.material.chip.ChipGroup>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ask_ai_question_label"
-                    android:textSize="14sp"
-                    android:textColor="@color/on_surface_variant"
-                    android:layout_marginBottom="8dp" />
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupQuestion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:selectionRequired="true"
-                    app:singleLine="false"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipQuestionTimeGoing"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/ask_ai_question_time_going" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipQuestionBalance"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ask_ai_question_balance" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipQuestionDoMore"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ask_ai_question_do_more" />
-                </com.google.android.material.chip.ChipGroup>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonGenerateInsights"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ask_ai_generate" />
-
-                <LinearLayout
-                    android:id="@+id/layoutInsightsLoading"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingTop="12dp"
-                    android:visibility="gone">
-
-                    <ProgressBar
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:indeterminate="true" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="@string/ask_ai_generating"
-                        android:textColor="@color/on_surface_variant"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/textViewInsightsEmpty"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/ask_ai_empty"
-                    android:textColor="@color/on_surface_variant"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/textViewInsightsError"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textColor="@color/error"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/layoutInsightsResult"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/textViewInsightTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/on_surface"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/textViewInsightSummary"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@color/on_surface"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/textViewHighlightsLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/ask_ai_highlights"
-                        android:textColor="@color/on_surface"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-
-                    <LinearLayout
-                        android:id="@+id/layoutInsightHighlights"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:orientation="vertical" />
-
-                    <TextView
-                        android:id="@+id/textViewRecommendationsLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/ask_ai_recommendations"
-                        android:textColor="@color/on_surface"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-
-                    <LinearLayout
-                        android:id="@+id/layoutInsightRecommendations"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:orientation="vertical" />
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Title -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/category_insights_title"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/on_surface"
-            android:layout_marginBottom="16dp" />
+                android:text="@string/category_insights_title"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_surface"
+                android:layout_marginBottom="16dp" />
 
         <!-- Category Dropdown -->
         <com.google.android.material.card.MaterialCardView
@@ -368,18 +159,27 @@
                     android:textColor="@color/primary"
                     android:layout_marginStart="8dp" />
 
+                <TextView
+                    android:id="@+id/textViewWeeklyTotalDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• 0/7 days"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface_variant"
+                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Weekly Chart Card -->
+        <!-- Weekly Hours Chart Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardWeeklyChart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -433,9 +233,44 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- ============ MONTHLY (YEAR VIEW) SECTION ============ -->
+        <!-- Weekly Days Chart Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardWeeklyDaysChart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone">
 
-        <!-- Year Navigation Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/textViewWeeklyDaysChartTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days Active"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/on_surface"
+                    android:layout_marginBottom="8dp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/weeklyDaysBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============ THIS MONTH SECTION ============ -->
+
+        <!-- Month Navigation Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -444,7 +279,7 @@
             android:layout_marginBottom="8dp">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonMonthlyPrevious"
+                android:id="@+id/buttonMonthPrevious"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -457,18 +292,18 @@
                 app:cornerRadius="24dp" />
 
             <TextView
-                android:id="@+id/textViewMonthlyPeriodLabel"
+                android:id="@+id/textViewMonthPeriodLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="2026"
+                android:text="This Month"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/on_surface" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonMonthlyNext"
+                android:id="@+id/buttonMonthNext"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -482,9 +317,200 @@
 
         </LinearLayout>
 
-        <!-- Yearly Total Hours -->
+        <!-- Month Total -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMonthlyTotalHours"
+            android:id="@+id/cardMonthTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monthly Total:"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface_variant" />
+
+                <TextView
+                    android:id="@+id/textViewMonthTotalHours"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.0h"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:layout_marginStart="8dp" />
+
+                <TextView
+                    android:id="@+id/textViewMonthTotalDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• 0 days"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface_variant"
+                    android:layout_marginStart="8dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Month Hours Chart Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMonthHoursChart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/textViewMonthHoursChartTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hours per Day"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/on_surface"
+                    android:layout_marginBottom="8dp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/monthHoursBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutMonthEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📊"
+                        android:textSize="40sp" />
+
+                    <TextView
+                        android:id="@+id/textViewMonthEmptyMessage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select a category to see monthly insights"
+                        android:textSize="14sp"
+                        android:textColor="@color/on_surface_variant"
+                        android:gravity="center"
+                        android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Month Days Chart Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMonthDaysChart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/textViewMonthDaysChartTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days per Week"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/on_surface"
+                    android:layout_marginBottom="8dp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/monthDaysBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============ THIS YEAR SECTION ============ -->
+
+        <!-- Year Navigation Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonYearlyPrevious"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                app:icon="@android:drawable/ic_media_previous"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:cornerRadius="24dp" />
+
+            <TextView
+                android:id="@+id/textViewYearlyPeriodLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="This Year"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/on_surface" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonYearlyNext"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                app:icon="@android:drawable/ic_media_next"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:cornerRadius="24dp" />
+
+        </LinearLayout>
+
+        <!-- Yearly Total -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardYearlyTotal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
@@ -507,7 +533,7 @@
                     android:textColor="@color/on_surface_variant" />
 
                 <TextView
-                    android:id="@+id/textViewMonthlyTotalHours"
+                    android:id="@+id/textViewYearlyTotalHours"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0.0h"
@@ -516,18 +542,27 @@
                     android:textColor="@color/primary"
                     android:layout_marginStart="8dp" />
 
+                <TextView
+                    android:id="@+id/textViewYearlyTotalDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• 0 days"
+                    android:textSize="15sp"
+                    android:textColor="@color/on_surface_variant"
+                    android:layout_marginStart="8dp" />
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Monthly Totals Chart Card -->
+        <!-- Yearly Hours Chart Card -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMonthlyChart"
+            android:id="@+id/cardYearlyHoursChart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -536,7 +571,7 @@
                 android:padding="12dp">
 
                 <TextView
-                    android:id="@+id/textViewMonthlyChartTitle"
+                    android:id="@+id/textViewYearlyHoursChartTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hours per Month"
@@ -546,13 +581,12 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/monthlyBarChart"
+                    android:id="@+id/yearlyHoursBarChart"
                     android:layout_width="match_parent"
                     android:layout_height="280dp" />
 
-                <!-- Monthly Empty state -->
                 <LinearLayout
-                    android:id="@+id/layoutMonthlyEmptyState"
+                    android:id="@+id/layoutYearlyEmptyState"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:gravity="center"
@@ -566,10 +600,10 @@
                         android:textSize="40sp" />
 
                     <TextView
-                        android:id="@+id/textViewMonthlyEmptyMessage"
+                        android:id="@+id/textViewYearlyEmptyMessage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Select a category to see monthly insights"
+                        android:text="Select a category to see yearly insights"
                         android:textSize="14sp"
                         android:textColor="@color/on_surface_variant"
                         android:gravity="center"
@@ -581,6 +615,56 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Yearly Days Chart Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardYearlyDaysChart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/textViewYearlyDaysChartTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days per Month"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/on_surface"
+                    android:layout_marginBottom="8dp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/yearlyDaysBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 
-</ScrollView>
+    </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabAskAi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/ask_ai_open_content_description"
+        android:text="@string/ask_ai_title"
+        android:textColor="@color/on_primary"
+        app:backgroundTint="@color/primary"
+        app:icon="@drawable/ic_chat_bubble"
+        app:iconTint="@color/on_primary" />
+
+</FrameLayout>

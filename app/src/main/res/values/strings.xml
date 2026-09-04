@@ -47,6 +47,9 @@
     <string name="calendar_all_categories">All categories</string>
 
     <string name="ask_ai_title">Ask AI</string>
+    <string name="ask_ai_welcome">Pick a period and question below, then generate insights about how you spend your time.</string>
+    <string name="ask_ai_assistant_label">AI</string>
+    <string name="ask_ai_open_content_description">Open Ask AI</string>
     <string name="ask_ai_period_label">Period</string>
     <string name="ask_ai_question_label">Question</string>
     <string name="ask_ai_period_last_7_days">Last 7 days</string>
